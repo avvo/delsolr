@@ -1,0 +1,61 @@
+= delsolr
+
+http://delsolr.rubyforge.org
+
+== DESCRIPTION:
+
+DelSolr is a light weight ruby wrapper for solr.  It's intention is to expose the full power of solr queries 
+while keeping the syntax as ruby-sque as possible.
+
+== FEATURES/PROBLEMS:
+
+* Only supports querying (GET), no indexing (POST) support yet
+
+== SYNOPSIS:
+
+c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
+rsp = c.query('dismax', :query => 'mp3 player', :filters => {:cost => (50..100)}, :facets => [{:field => 'brand', :limit => 10}])
+
+# output total matches
+puts rsp.total
+
+# output each id with score
+rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
+
+# output each value for a facet
+rsp.facet_field_values('brand').each do |brand|
+  puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
+end
+
+== REQUIREMENTS:
+
+You need Solr installed somewhere so you can query it ;)
+
+== INSTALL:
+
+sudo gem install delsolr
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2008 FIXME full name
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

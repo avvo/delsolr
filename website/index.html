@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <link rel="stylesheet" href="stylesheets/screen.css" type="text/css" media="screen" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>
+      delsolr
+  </title>
+  <script src="javascripts/rounded_corners_lite.inc.js" type="text/javascript"></script>
+<style>
+
+</style>
+  <script type="text/javascript">
+    window.onload = function() {
+      settings = {
+          tl: { radius: 10 },
+          tr: { radius: 10 },
+          bl: { radius: 10 },
+          br: { radius: 10 },
+          antiAlias: true,
+          autoPad: true,
+          validTags: ["div"]
+      }
+      var versionBox = new curvyCorners(settings, document.getElementById("version"));
+      versionBox.applyCornersToAll();
+    }
+  </script>
+</head>
+<body>
+<div id="main">
+
+    <h1>delsolr</h1>
+    <div id="version" class="clickable" onclick='document.location = "http://rubyforge.org/projects/delsolr"; return false'>
+      <p>Get Version</p>
+      <a href="http://rubyforge.org/projects/delsolr" class="numbers">0.0.1</a>
+    </div>
+    <h2>What</h2>
+<p>delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">solr</a>.  It&#8217;s goal is to <br />
+preserve all the power of the solr webservice while keeping the interface as simple and ruby-esque as possible.</p>
+<h2>Installing</h2>
+<p><pre class='syntax'><span class="ident">sudo</span> <span class="ident">gem</span> <span class="ident">install</span> <span class="ident">delsolr</span></pre></p>
+<h2>Demonstration of usage</h2>
+<p>See the <a href="http://delsolr.rubyforge.org/rdoc">rdoc</a> for full documentation. Also, check out <a href="http://ruby-on-the-interrails.blogspot.com">ruby-on-the-interrails</a> for updates, news, trick, etc&#8230;</p>
+<p><pre class='syntax'>
+<span class="ident">c</span> <span class="punct">=</span> <span class="constant">DelSolr</span><span class="punct">::</span><span class="constant">Client</span><span class="punct">.</span><span class="ident">new</span><span class="punct">(</span><span class="symbol">:server</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">solr1</span><span class="punct">',</span> <span class="symbol">:port</span> <span class="punct">=&gt;</span> <span class="number">8983</span><span class="punct">)</span>
+<span class="ident">rsp</span> <span class="punct">=</span> <span class="ident">c</span><span class="punct">.</span><span class="ident">query</span><span class="punct">('</span><span class="string">dismax</span><span class="punct">',</span>
+               <span class="symbol">:query</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">mp3 player</span><span class="punct">',</span>
+               <span class="symbol">:filters</span> <span class="punct">=&gt;</span> <span class="punct">{</span><span class="symbol">:cost</span> <span class="punct">=&gt;</span> <span class="punct">(</span><span class="number">50</span><span class="punct">..</span><span class="number">100</span><span class="punct">)},</span>
+               <span class="symbol">:facets</span> <span class="punct">=&gt;</span> <span class="punct">[{</span><span class="symbol">:field</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">brand</span><span class="punct">',</span> <span class="symbol">:limit</span> <span class="punct">=&gt;</span> <span class="number">10</span><span class="punct">}])</span>
+
+<span class="comment"># output total matches</span>
+<span class="ident">puts</span> <span class="ident">rsp</span><span class="punct">.</span><span class="ident">total</span>
+
+<span class="comment"># output each id with score</span>
+<span class="ident">rsp</span><span class="punct">.</span><span class="ident">docs</span><span class="punct">.</span><span class="ident">each</span> <span class="punct">{</span> <span class="punct">|</span><span class="ident">doc</span><span class="punct">|</span> <span class="ident">puts</span> <span class="punct">&quot;</span><span class="string"><span class="expr">#{doc[:id]}</span> - <span class="expr">#{doc[:score]}</span></span><span class="punct">&quot;</span> <span class="punct">}</span>
+
+<span class="comment"># output each value for a facet</span>
+<span class="ident">rsp</span><span class="punct">.</span><span class="ident">facet_field_values</span><span class="punct">('</span><span class="string">brand</span><span class="punct">').</span><span class="ident">each</span> <span class="keyword">do</span> <span class="punct">|</span><span class="ident">brand</span><span class="punct">|</span>
+  <span class="ident">puts</span> <span class="punct">&quot;</span><span class="string"><span class="expr">#{brand}</span>: <span class="expr">#{rsp.facet_field_count('brand', brand}</span></span><span class="punct">&quot;</span>
+<span class="keyword">end</span>
+</pre></p>
+<h2>Forum</h2>
+<p><a href="http://groups.google.com/group/delsolr">http://groups.google.com/group/delsolr</a></p>
+<h2>How to submit patches</h2>
+<p>You can fetch the source from github: <a href="http://github.com/avvo/delsolr/tree/master">http://github.com/avvo/delsolr/tree/master</a></p>
+<p>Or you can submit diffs via the google group and they may or may not make it in.</p>
+<h2>How to report bugs</h2>
+<p>Please use the tracker on <a href="http://rubyforge.org/tracker/?atid=13768&amp;group_id=3568&amp;func=browse">rubyforge</a></p>
+<h3>Build and test instructions</h3>
+<pre>cd delsolr
+rake test
+rake install_gem</pre>
+<h2>License</h2>
+<p>This code is free to use under the terms of the <span class="caps">MIT</span> license.</p>
+<h2>Contact</h2>
+<p>Comments are welcome. Send an email to Ben VandenBos email via the <a href="http://groups.google.com/group/delsolr">google group</a></p>
+    <p class="coda">
+      <a href="http://ruby-on-the-interrails.blogspot.com">ruby-on-the-interrails</a><br/>
+      <a href="http://www.avvo.com">find a lawyer</a><br/>
+      Theme extended from <a href="http://rb2js.rubyforge.org/">Paul Battley</a>
+    </p>
+</div>
+
+<!-- insert site tracking codes here, like Google Urchin -->
+
+</body>
+</html>

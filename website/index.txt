@@ -1,0 +1,63 @@
+h1. delsolr
+
+h2. What
+
+delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">solr</a>.  It's goal is to 
+preserve all the power of the solr webservice while keeping the interface as simple and ruby-esque as possible.
+
+h2. Installing
+
+<pre syntax="ruby">sudo gem install delsolr</pre>
+
+h2. Demonstration of usage
+
+See the "rdoc":http://delsolr.rubyforge.org/rdoc for full documentation. Also, check out "ruby-on-the-interrails":http://ruby-on-the-interrails.blogspot.com for updates, news, trick, etc...
+
+<pre syntax="ruby">
+c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
+rsp = c.query('dismax',
+               :query => 'mp3 player',
+               :filters => {:cost => (50..100)},
+               :facets => [{:field => 'brand', :limit => 10}])
+
+# output total matches
+puts rsp.total
+
+# output each id with score
+rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
+
+# output each value for a facet
+rsp.facet_field_values('brand').each do |brand|
+  puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
+end
+</pre>
+
+h2. Forum
+
+"http://groups.google.com/group/delsolr":http://groups.google.com/group/delsolr
+
+h2. How to submit patches
+
+You can fetch the source from github: "http://github.com/avvo/delsolr/tree/master":http://github.com/avvo/delsolr/tree/master
+
+Or you can submit diffs via the google group and they may or may not make it in.
+
+h2. How to report bugs
+
+Please use the tracker on "rubyforge":http://rubyforge.org/tracker/?atid=13768&group_id=3568&func=browse
+
+h3. Build and test instructions
+
+<pre>cd delsolr
+rake test
+rake install_gem</pre>
+
+
+h2. License
+
+This code is free to use under the terms of the MIT license. 
+
+h2. Contact
+
+Comments are welcome. Send an email to Ben VandenBos email via the "google group":http://groups.google.com/group/delsolr
+

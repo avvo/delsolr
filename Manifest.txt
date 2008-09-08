@@ -1,0 +1,11 @@
+History.txt
+License.txt
+Manifest.txt
+README.txt
+Rakefile
+lib/delsolr.rb
+lib/delsolr/configuration.rb
+lib/delsolr/extensions.rb
+lib/delsolr/query_builder.rb
+lib/delsolr/response.rb
+lib/delsolr/version.rb

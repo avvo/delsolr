@@ -27,7 +27,7 @@ sudo gem install delsolr
 
 (The MIT License)
 
-Copyright (c) 2008 Avvo, INC
+Copyright (c) 2008 Avvo, INC - http://www.avvo.com
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

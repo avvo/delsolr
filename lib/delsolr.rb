@@ -20,7 +20,7 @@ module DelSolr
   
   class Client
     
-    attr_reader :configuration, :connection, :logger
+    attr_reader :configuration, :connection
     
     #
     # [<b><tt>:server</tt></b>]

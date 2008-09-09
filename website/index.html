@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="stylesheets/screen.css" type="text/css" media="screen" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>
-      delsolr
+      DelSolr &#8211; Simplifying Solr Facets in Ruby
   </title>
   <script src="javascripts/rounded_corners_lite.inc.js" type="text/javascript"></script>
 <style>
@@ -30,24 +30,27 @@
 <body>
 <div id="main">
 
-    <h1>delsolr</h1>
+    <h1>DelSolr &#8211; Simplifying Solr Facets in Ruby</h1>
     <div id="version" class="clickable" onclick='document.location = "http://rubyforge.org/projects/delsolr"; return false'>
       <p>Get Version</p>
       <a href="http://rubyforge.org/projects/delsolr" class="numbers">0.0.1</a>
     </div>
     <h2>What</h2>
-<p>delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">solr</a>.  It&#8217;s goal is to <br />
-preserve all the power of the solr webservice while keeping the interface as simple and ruby-esque as possible.</p>
+<p>delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">Solr</a>.  Its goal is to <br />
+preserve all the power of the Solr webservice while keeping the interface as simple and ruby-esque as possible.</p>
 <h2>Installing</h2>
 <p><pre class='syntax'><span class="ident">sudo</span> <span class="ident">gem</span> <span class="ident">install</span> <span class="ident">delsolr</span></pre></p>
 <h2>Demonstration of usage</h2>
-<p>See the <a href="http://delsolr.rubyforge.org/rdoc">rdoc</a> for full documentation. Also, check out <a href="http://ruby-on-the-interrails.blogspot.com">ruby-on-the-interrails</a> for updates, news, trick, etc&#8230;</p>
+<p>See the <a href="http://delsolr.rubyforge.org/rdoc">rdoc</a> for full documentation. Also, check out <a href="http://ruby-on-the-interrails.blogspot.com">ruby-on-the-interrails</a> for updates, news, tricks, etc&#8230;</p>
 <p><pre class='syntax'>
+
 <span class="ident">c</span> <span class="punct">=</span> <span class="constant">DelSolr</span><span class="punct">::</span><span class="constant">Client</span><span class="punct">.</span><span class="ident">new</span><span class="punct">(</span><span class="symbol">:server</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">solr1</span><span class="punct">',</span> <span class="symbol">:port</span> <span class="punct">=&gt;</span> <span class="number">8983</span><span class="punct">)</span>
 <span class="ident">rsp</span> <span class="punct">=</span> <span class="ident">c</span><span class="punct">.</span><span class="ident">query</span><span class="punct">('</span><span class="string">dismax</span><span class="punct">',</span>
                <span class="symbol">:query</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">mp3 player</span><span class="punct">',</span>
                <span class="symbol">:filters</span> <span class="punct">=&gt;</span> <span class="punct">{</span><span class="symbol">:cost</span> <span class="punct">=&gt;</span> <span class="punct">(</span><span class="number">50</span><span class="punct">..</span><span class="number">100</span><span class="punct">)},</span>
-               <span class="symbol">:facets</span> <span class="punct">=&gt;</span> <span class="punct">[{</span><span class="symbol">:field</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">brand</span><span class="punct">',</span> <span class="symbol">:limit</span> <span class="punct">=&gt;</span> <span class="number">10</span><span class="punct">}])</span>
+               <span class="symbol">:facets</span> <span class="punct">=&gt;</span> <span class="punct">[{</span><span class="symbol">:field</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">brand</span><span class="punct">',</span> <span class="symbol">:limit</span> <span class="punct">=&gt;</span> <span class="number">10</span><span class="punct">},</span>
+                           <span class="punct">{</span><span class="symbol">:query</span> <span class="punct">=&gt;</span> <span class="punct">{</span><span class="symbol">:onsale</span> <span class="punct">=&gt;</span> <span class="constant">true</span><span class="punct">,</span> <span class="symbol">:brand</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">Apple</span><span class="punct">'},</span>
+                            <span class="symbol">:name</span> <span class="punct">=&gt;</span> <span class="punct">'</span><span class="string">cheap_apple</span><span class="punct">'}])</span>
 
 <span class="comment"># output total matches</span>
 <span class="ident">puts</span> <span class="ident">rsp</span><span class="punct">.</span><span class="ident">total</span>
@@ -59,6 +62,10 @@ preserve all the power of the solr webservice while keeping the interface as sim
 <span class="ident">rsp</span><span class="punct">.</span><span class="ident">facet_field_values</span><span class="punct">('</span><span class="string">brand</span><span class="punct">').</span><span class="ident">each</span> <span class="keyword">do</span> <span class="punct">|</span><span class="ident">brand</span><span class="punct">|</span>
   <span class="ident">puts</span> <span class="punct">&quot;</span><span class="string"><span class="expr">#{brand}</span>: <span class="expr">#{rsp.facet_field_count('brand', brand}</span></span><span class="punct">&quot;</span>
 <span class="keyword">end</span>
+
+<span class="comment"># output a query facet</span>
+<span class="ident">puts</span> <span class="punct">&quot;</span><span class="string">Cheap Apple: <span class="expr">#{rsp.facet_query_count_by_name('cheap_apple')}</span></span><span class="punct">&quot;</span>
+
 </pre></p>
 <h2>Forum</h2>
 <p><a href="http://groups.google.com/group/delsolr">http://groups.google.com/group/delsolr</a></p>
@@ -82,7 +89,14 @@ rake install_gem</pre>
     </p>
 </div>
 
-<!-- insert site tracking codes here, like Google Urchin -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-5561691-1");
+pageTracker._trackPageview();
+</script>
 
 </body>
 </html>

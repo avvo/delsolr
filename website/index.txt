@@ -1,9 +1,9 @@
-h1. delsolr
+h1. DelSolr - Simplifying Solr Facets in Ruby
 
 h2. What
 
-delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">solr</a>.  It's goal is to 
-preserve all the power of the solr webservice while keeping the interface as simple and ruby-esque as possible.
+delsolr is a light weight ruby wrapper for <a href="http://lucene.apache.org/solr/">Solr</a>.  Its goal is to 
+preserve all the power of the Solr webservice while keeping the interface as simple and ruby-esque as possible.
 
 h2. Installing
 
@@ -11,14 +11,17 @@ h2. Installing
 
 h2. Demonstration of usage
 
-See the "rdoc":http://delsolr.rubyforge.org/rdoc for full documentation. Also, check out "ruby-on-the-interrails":http://ruby-on-the-interrails.blogspot.com for updates, news, trick, etc...
+See the "rdoc":http://delsolr.rubyforge.org/rdoc for full documentation. Also, check out "ruby-on-the-interrails":http://ruby-on-the-interrails.blogspot.com for updates, news, tricks, etc...
 
 <pre syntax="ruby">
+
 c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
 rsp = c.query('dismax',
                :query => 'mp3 player',
                :filters => {:cost => (50..100)},
-               :facets => [{:field => 'brand', :limit => 10}])
+               :facets => [{:field => 'brand', :limit => 10},
+                           {:query => {:onsale => true, :brand => 'Apple'},
+                            :name => 'cheap_apple'}])
 
 # output total matches
 puts rsp.total
@@ -30,6 +33,10 @@ rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
 rsp.facet_field_values('brand').each do |brand|
   puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
 end
+
+# output a query facet
+puts "Cheap Apple stuff: #{rsp.facet_query_count_by_name('cheap_apple')}"
+
 </pre>
 
 h2. Forum

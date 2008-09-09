@@ -1,13 +1,13 @@
 body {
-  background-color: #E1D1F1;
+  background-color: #B0AADB;
   font-family: "Georgia", sans-serif;
   font-size: 16px;
   line-height: 1.6em;
   padding: 1.6em 0 0 0;
-  color: #333;
+  color: #000;
 }
 h1, h2, h3, h4, h5, h6 {
-  color: #444;
+  color: #000;
 }
 h1 { 
   font-family: sans-serif;
@@ -101,7 +101,7 @@ pre, code {
   text-align: right;
   font-family: sans-serif;
   font-weight: normal;
-  background-color: #B3ABFF;
+  background-color: #E1D1F1;
   color: #141331;
   padding: 15px 20px 10px 20px;
   margin: 0 auto;
@@ -120,7 +120,7 @@ pre, code {
 #version p {
   text-decoration: none;
 	color: #141331;
-	background-color: #B3ABFF;
+	background-color: #E1D1F1;
 	margin: 0;
 	padding: 0;
 }
@@ -128,7 +128,7 @@ pre, code {
 #version a {
   text-decoration: none;
 	color: #141331;
-	background-color: #B3ABFF;
+	background-color: #E1D1F1;
 }
 
 .clickable {

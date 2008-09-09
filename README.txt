@@ -15,6 +15,31 @@ while keeping the interface as ruby-esque as possible.
 
 See http://delsolr.rubyforge.org for more info
 
+Example:
+
+c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
+rsp = c.query('dismax',
+               :query => 'mp3 player',
+               :filters => {:cost => (50..100)},
+               :facets => [{:field => 'brand', :limit => 10},
+                           {:query => {:onsale => true, :brand => 'Apple'},
+                            :name => 'cheap_apple'}])
+
+# output total matches
+puts rsp.total
+
+# output each id with score
+rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
+
+# output each value for a facet
+rsp.facet_field_values('brand').each do |brand|
+  puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
+end
+
+# output a query facet
+puts "Cheap Apple: #{rsp.facet_query_count_by_name('cheap_apple')}"
+
+
 == REQUIREMENTS:
 
 You need Solr installed somewhere so you can query it ;)

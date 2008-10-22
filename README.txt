@@ -60,7 +60,6 @@ sudo gem install delsolr
 
 == TODO:
 
- * finish unit tests (use mocha to stub out Net::HTTP)
  * implement delete_by_query
  * make thread safe
    * it would be nice to be able to have things like commit/optimize be ran in threads on timers periodically

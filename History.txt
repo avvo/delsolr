@@ -3,3 +3,7 @@
 * 1 major enhancement:
   * Initial release
   * No support for POST
+
+== 0.0.2 2008-10-22
+
+* Added posting support (add/delete)

@@ -89,7 +89,7 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert_equal(p['q'], 'index_type:books')
   end
   
-  def test_facets
+  def test_facets_001
     qb = nil
     opts = {}
     opts[:query] = "games"
@@ -106,7 +106,7 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert_equal(p['f.on_sale_b.facet.limit'], '1')
   end
   
-  def test_facets
+  def test_facets_002
     qb = nil
     opts = {}
     opts[:query] = "games"

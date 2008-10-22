@@ -37,6 +37,17 @@ end
 # output a query facet
 puts "Cheap Apple stuff: #{rsp.facet_query_count_by_name('cheap_apple')}"
 
+# adding things
+doc = DelSolr::Document.new
+doc.add_field('id', 'ABC-123')
+doc.add_field('name', '8 Gig Shuffle')
+doc.add_field('description', 'A crazy-tiny MP3 player')
+c.update!(doc) # posts new document to solr
+c.commit! # posts a commit to solr
+
+rsp = c.query('dismax', :query => 'shuffle mp3 player')
+puts rsp.ids[0]
+
 </pre>
 
 h2. Forum

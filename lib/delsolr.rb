@@ -6,6 +6,7 @@
 # see README.txt
 #
 
+
 require 'net/http'
 
 require 'digest/md5'
@@ -14,13 +15,15 @@ require File.join(File.dirname(__FILE__), 'delsolr', 'version')
 require File.join(File.dirname(__FILE__), 'delsolr', 'response')
 require File.join(File.dirname(__FILE__), 'delsolr', 'configuration')
 require File.join(File.dirname(__FILE__), 'delsolr', 'query_builder')
+require File.join(File.dirname(__FILE__), 'delsolr', 'document')
 require File.join(File.dirname(__FILE__), 'delsolr', 'extensions')
+
 
 module DelSolr
   
   class Client
     
-    attr_reader :configuration, :connection
+    attr_reader :configuration
     
     #
     # [<b><tt>:server</tt></b>]
@@ -35,7 +38,7 @@ module DelSolr
     # [<b><tt>:shortcuts</tt></b>]
     #   (options) a list of values in the doc fields to generate short cuts for (ie: [:scores, :id], you will be able to call <tt>rsp.scores</tt> and have it return an array of scores, likewise for <tt>ids</tt>.) Defaults to [:id, :unique_id, :score]
     def initialize(options = {})
-      @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port])
+      @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout])
       @cache = options[:cache]
       @shortcuts = options[:shortcuts]
     end
@@ -155,12 +158,7 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-
-        # only bother to create the connection if we know we failed to hit the cache
-        @connection ||= Net::HTTP.new(configuration.server, configuration.port)      
-        raise "Failed to connect to #{configuration.server}:#{configuration.port}" if @connection.nil?
-
-        header, body = @connection.get(query_builder.request_string)
+        header, body = connection.get(query_builder.request_string)
 
         # add to the cache if caching
         if enable_caching
@@ -173,6 +171,95 @@ module DelSolr
 
       DelSolr::Client::Response.new(body, query_builder, :from_cache => from_cache, :shortcuts => @shortcuts)
     end
+    
+    # Adds a document to the buffer to be posted to solr (NOTE: does not perform the actual post)
+    #
+    # [<b><tt>docs</tt></b>]
+    #            docs must be a DelSolr::Document or array of instances.  See DelSolr::Document for how to setup a document 
+    def update(docs)
+      self.pending_documents.push(*Array(docs))
+      true
+    end
+    
+    # Exactly like <tt>update</tt>, but performs the post immediately. Use <tt>update</tt> if you wish to batch document updates.
+    def update!(docs)
+      update(docs) && post_update!
+    end
+    
+    # Calls <tt>update!</tt> on the docs and then <tt>commit!</tt>
+    def update_and_commit!(docs)
+      update!(docs) && commit!
+    end
+    
+    # posts the buffer created by <tt>update</tt> to solr
+    def post_update!
+      h,b = post(prepare_update_xml())
+      success?(b)
+    end
+    
+    # deletes <tt>unique_id</tt> from the index
+    def delete(unique_id)
+      h,b = post("<delete><id>#{unique_id}</id></delete>")
+      success?(b)
+    end
+    
+    # not implemented
+    def delete_by_query(query)
+      raise 'not implemented yet :('
+    end
+    
+    # commits all pending adds/deletes
+    def commit!
+      h,b = post("<commit/>")
+      success?(b)
+    end
+    
+    # posts the optimize directive to solr
+    def optimize!
+      h,b = post("<optimize/>")
+      success?(b)
+    end
 
+    # accessor to the connection instance
+    def connection
+      @connection ||= begin
+        c = Net::HTTP.new(configuration.server, configuration.port)
+        c.read_timeout = configuration.timeout
+        raise "Failed to connect to #{configuration.server}:#{configuration.port}" if c.nil?
+        c
+      end
+    end
+
+    # clears out the connection so a new one will be created
+    def reset_connection!
+      @connection = nil
+    end
+    
+    # returns the array of documents that are waiting to be posted to solr
+    def pending_documents
+      @pending_documents ||= []
+    end
+    
+    private
+    
+    # returns the update xml buffer
+    def prepare_update_xml
+      r = ["<add>\n"]
+      # copy and clear pending docs
+      working_docs, @pending_documents = @pending_documents, nil
+      working_docs.each { |doc| r << doc.xml }
+      r << "\n</add>\n"
+      r.join # not sure, but I think Array#join is faster then String#<< for large buffers
+    end
+    
+    # helper for posting data to solr
+    def post(buffer)
+      connection.post('/solr/update', buffer, {'Content-type' => 'text/xml;charset=utf-8'})
+    end
+    
+    def success?(response_body)
+      response_body == '<result status="0"></result>'
+    end
+    
   end
 end

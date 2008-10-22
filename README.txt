@@ -17,27 +17,26 @@ See http://delsolr.rubyforge.org for more info
 
 Example:
 
-c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
-rsp = c.query('dismax',
-               :query => 'mp3 player',
-               :filters => {:cost => (50..100)},
-               :facets => [{:field => 'brand', :limit => 10},
-                           {:query => {:onsale => true, :brand => 'Apple'},
-                            :name => 'cheap_apple'}])
+    c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
+    rsp = c.query('dismax', :query => 'mp3 player',
+                            :filters => {:cost => (50..100)},
+                            :facets => [{:field => 'brand', :limit => 10},
+                                        {:query => {:onsale => true, :brand => 'Apple'},
+                                         :name => 'cheap_apple'}])
 
-# output total matches
-puts rsp.total
+    # output total matches
+    puts rsp.total
 
-# output each id with score
-rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
+    # output each id with score
+    rsp.docs.each { |doc| puts "#{doc[:id]} - #{doc[:score]}" }
 
-# output each value for a facet
-rsp.facet_field_values('brand').each do |brand|
-  puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
-end
+    # output each value for a facet
+    rsp.facet_field_values('brand').each do |brand|
+      puts "#{brand}: #{rsp.facet_field_count('brand', brand}"
+    end
 
-# output a query facet
-puts "Cheap Apple: #{rsp.facet_query_count_by_name('cheap_apple')}"
+    # output a query facet
+    puts "Cheap Apple stuff: #{rsp.facet_query_count_by_name('cheap_apple')}"
 
 
 == REQUIREMENTS:
@@ -47,6 +46,17 @@ You need Solr installed somewhere so you can query it ;)
 == INSTALL:
 
 sudo gem install delsolr
+
+== TODO:
+
+ * finish unit tests (use mocha to stub out Net::HTTP)
+ * implement delete_by_query
+ * make thread safe
+   * it would be nice to be able to have things like commit/optimize be ran in threads on timers periodically
+   * right now a few things need to be locked
+     * connection
+     * pending_documents array
+
 
 == LICENSE:
 

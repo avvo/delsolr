@@ -8,4 +8,6 @@ lib/delsolr/configuration.rb
 lib/delsolr/extensions.rb
 lib/delsolr/query_builder.rb
 lib/delsolr/response.rb
+lib/delsolr/document.rb
 lib/delsolr/version.rb
+

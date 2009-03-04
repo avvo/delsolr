@@ -127,7 +127,7 @@ module DelSolr
                 query_string_array << "#{k}:#{val}"
               end
             elsif v.is_a?(Range)
-              query_string_array << "#{k}:[#{v.min} TO #{v.max}]"
+              query_string_array << "#{k}:[#{v.begin} TO #{v.end}]"
             else
               query_string_array << "#{k}:#{v}"
             end
@@ -154,7 +154,7 @@ module DelSolr
                 params << {key => "#{k}:#{val}"}
               end
             elsif v.is_a?(Range)
-              params << {key => "#{k}:[#{v.min} TO #{v.max}]"}
+              params << {key => "#{k}:[#{v.begin} TO #{v.end}]"}
             else
               params << {key => "#{k}:#{v}"}
             end

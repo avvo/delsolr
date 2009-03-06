@@ -71,6 +71,7 @@ module DelSolr
 
         filters = opts.delete(:filters)
         params += build_filters(:fq, filters)
+        params += build_filters(:bq, opts.delete(:bq))
 
         facets = opts.delete(:facets)
         if facets

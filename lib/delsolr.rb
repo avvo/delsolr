@@ -35,7 +35,10 @@ module DelSolr
     #   (optional) a cache instance (any object the supports get and set)
     # 
     # [<b><tt>:shortcuts</tt></b>]
-    #   (options) a list of values in the doc fields to generate short cuts for (ie: [:scores, :id], you will be able to call <tt>rsp.scores</tt> and have it return an array of scores, likewise for <tt>ids</tt>.) Defaults to [:id, :unique_id, :score]
+    #   (optional) a list of values in the doc fields to generate short cuts for (ie: [:scores, :id], you will be able to call <tt>rsp.scores</tt> and have it return an array of scores, likewise for <tt>ids</tt>.) Defaults to [:id, :unique_id, :score]
+    #
+    # [<b><tt>:path</tt></b>]
+    #   (optional) the path of the solr install (defaults to "/solr")
     def initialize(options = {})
       @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout], options[:path])
       @cache = options[:cache]

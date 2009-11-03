@@ -37,7 +37,7 @@ module DelSolr
     # [<b><tt>:shortcuts</tt></b>]
     #   (options) a list of values in the doc fields to generate short cuts for (ie: [:scores, :id], you will be able to call <tt>rsp.scores</tt> and have it return an array of scores, likewise for <tt>ids</tt>.) Defaults to [:id, :unique_id, :score]
     def initialize(options = {})
-      @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout])
+      @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout], options[:path])
       @cache = options[:cache]
       @shortcuts = options[:shortcuts]
     end
@@ -157,7 +157,7 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        header, body = connection.get(query_builder.request_string)
+        header, body = connection.get(configuration.path + query_builder.request_string)
 
         # add to the cache if caching
         if enable_caching
@@ -253,7 +253,7 @@ module DelSolr
     
     # helper for posting data to solr
     def post(buffer)
-      connection.post('/solr/update', buffer, {'Content-type' => 'text/xml;charset=utf-8'})
+      connection.post("#{configuration.path}/update", buffer, {'Content-type' => 'text/xml;charset=utf-8'})
     end
     
     def success?(response_body)

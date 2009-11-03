@@ -11,7 +11,6 @@ require 'net/http'
 
 require 'digest/md5'
 
-require File.join(File.dirname(__FILE__), 'delsolr', 'version')
 require File.join(File.dirname(__FILE__), 'delsolr', 'response')
 require File.join(File.dirname(__FILE__), 'delsolr', 'configuration')
 require File.join(File.dirname(__FILE__), 'delsolr', 'query_builder')

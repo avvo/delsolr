@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/test_helper'
 require 'rubygems'
-gem 'mocha', '=0.9.0'
+gem 'mocha', '>=0.9.0'
 require 'mocha'
 
 class ClientTest < Test::Unit::TestCase

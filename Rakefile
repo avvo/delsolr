@@ -1,4 +1,7 @@
-require 'config/requirements'
-require 'config/hoe' # setup Hoe + all gem configuration
+require 'rake/testtask'
 
-Dir['tasks/**/*.rake'].each { |rake| load rake }
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/test*.rb']
+  t.verbose = true
+end

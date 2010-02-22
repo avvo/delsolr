@@ -221,6 +221,30 @@ class ClientTest < Test::Unit::TestCase
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
     assert(r.from_cache?, 'this one should be from the cache')
   end
+
+  if RUBY_VERSION.to_f >= 1.9
+    def test_query_encoding_ruby19_ut8
+      c = setup_client
+
+      mock_query_builder = DelSolr::Client::QueryBuilder
+      mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
+      DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
+      c.connection.expects(:get).with("/solr" + mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+      r = c.query('standard', :query => '123')
+      assert(r)
+
+      ensure_encoding = lambda { |v|
+        case v
+          when String; assert_equal 'UTF-8', v.encoding.name
+          when Array; v.each(&ensure_encoding)
+          when Hash; (v.keys + v.values).each(&ensure_encoding)
+        end
+      }
+
+      ensure_encoding.call(r.raw_response)
+    end
+  end
+  
   
 private
   

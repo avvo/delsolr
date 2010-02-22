@@ -162,6 +162,12 @@ module DelSolr
       if body.blank? # cache miss (or wasn't enabled)
         header, body = connection.get(configuration.path + query_builder.request_string)
 
+        # We get UTF-8 from Solr back, make sure the string knows about it
+        # when running on Ruby >= 1.9
+        if body.respond_to?(:force_encoding)
+          body.force_encoding("UTF-8")
+        end
+
         # add to the cache if caching
         if enable_caching
           begin

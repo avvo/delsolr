@@ -14,6 +14,17 @@ class DocumentTest < Test::Unit::TestCase
     
     assert_equal(buf, d.xml)
   end
+
+  def test_create_with_boost
+    d = DelSolr::Document.new :boost => 2.5
+    assert(d)
+    
+    d.add_field('person_name', 'John Smith')
+    
+    buf = "<doc boost=\"2.5\">\n<field name=\"person_name\">John Smith</field>\n</doc>"
+    
+    assert_equal(buf, d.xml)
+  end
   
   def test_cdata
     d = DelSolr::Document.new
@@ -25,5 +36,5 @@ class DocumentTest < Test::Unit::TestCase
     
     assert_equal(buf, d.xml)
   end
-  
+
 end

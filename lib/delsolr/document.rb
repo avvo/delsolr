@@ -37,6 +37,10 @@ module DelSolr
   #
   class Document
 
+    def initialize(options={})
+      @options = options
+    end
+
     # [<b><tt>field_mame</tt></b>]
     #         is the name of the field in your schema.xml
     # [<b><tt>value</tt></b>]
@@ -50,7 +54,7 @@ module DelSolr
     end
 
     def xml
-      "<doc>\n" + field_buffer + "</doc>"
+      "<doc#{opts2str(@options)}>\n" + field_buffer + "</doc>"
     end
 
     private
@@ -59,14 +63,8 @@ module DelSolr
     def construct_field_tag(name, value, options={})
       options[:name] = name.to_s
       use_cdata = options.delete(:cdata)
-      opts = []
-      options.each do |k,v| 
-        opts.push "#{k}=\"#{v}\""
-      end
-      opts = opts.join(" ")
-      opts = " " + opts if opts
 
-      return "<field#{opts}>#{use_cdata ? cdata(value) : value}</field>\n"
+      return "<field#{opts2str(options)}>#{use_cdata ? cdata(value) : value}</field>\n"
     end  
 
     def cdata(str)
@@ -75,6 +73,16 @@ module DelSolr
 
     def field_buffer
       @buffer ||= ""
+    end
+
+    def opts2str(options)
+      opts = []
+      options.each do |k,v|
+        opts.push "#{k}=\"#{v}\""
+      end
+      opts = opts.join(" ")
+      opts = " " + opts unless opts.blank?
+      opts
     end
 
   end

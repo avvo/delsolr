@@ -22,7 +22,7 @@ module DelSolr
   
   class Client
     
-    attr_reader :configuration
+    attr_reader :configuration, :logger
     
     #
     # [<b><tt>:server</tt></b>]
@@ -39,9 +39,13 @@ module DelSolr
     #
     # [<b><tt>:path</tt></b>]
     #   (optional) the path of the solr install (defaults to "/solr")
+    #
+    # [<b><tt>:logger</tt></b>]
+    #   (optional) Log4r logger object
     def initialize(options = {})
       @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout], options[:path])
       @cache = options[:cache]
+      @logger = options[:logger]
       @shortcuts = options[:shortcuts]
     end
     
@@ -155,12 +159,19 @@ module DelSolr
 
       # if we're caching, first try looking in the cache
       if enable_caching
+        t1 = Time.now
         body = @cache.get(cache_key) rescue body = nil
         from_cache = true unless body.blank?
+        cache_time = (Time.now - t1).to_i * 1000 # retrieval time from the cache in ms
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        header, body = connection.get(configuration.path + query_builder.request_string)
+        begin
+          header, body = connection.get(configuration.path + query_builder.request_string)
+        rescue Timeout::Error
+          # If we timed out, just return nil and let the client decide what to do
+          return nil
+        end
 
         # We get UTF-8 from Solr back, make sure the string knows about it
         # when running on Ruby >= 1.9
@@ -177,7 +188,9 @@ module DelSolr
         end
       end
 
-      DelSolr::Client::Response.new(body, query_builder, :from_cache => from_cache, :shortcuts => @shortcuts)
+      response = DelSolr::Client::Response.new(body, query_builder, :logger => logger, :from_cache => from_cache, :shortcuts => @shortcuts)
+      logger.info "#{from_cache ? 'C' : 'S'},#{from_cache ? cache_time : response.qtime},#{response.total},http://#{configuration.server}:#{configuration.port}#{response.request_url}" if logger && response && response.success?
+      response
     end
     
     # Adds a document to the buffer to be posted to solr (NOTE: does not perform the actual post)

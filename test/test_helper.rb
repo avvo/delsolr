@@ -1,2 +1,2 @@
 require 'test/unit'
-require File.dirname(__FILE__) + '/../lib/delsolr'
+require File.expand_path(File.dirname(__FILE__)) + '/../lib/delsolr'

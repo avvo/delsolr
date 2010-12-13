@@ -41,12 +41,13 @@ module DelSolr
         opts[:q] ||= opts[:query]
         opts[:rows] ||= opts[:limit] || 10
         opts[:start] ||= opts[:offset] || 0
+        opts[:start] = 0 if opts[:start].to_i < 0
         opts[:fl] ||= opts[:fields] || FL_DEFAULTS
         opts[:bq] ||= opts[:boost]
         opts[:suggestionCount] ||= opts[:suggestion_count]
         opts[:onlyMorePopular] ||= opts[:only_more_popular]
         
-        raise ":query or :q must be set" if opts[:q].blank?
+        raise ":query or :q must be set" if opts[:q].nil? || opts[:q].empty?
         
         # clear out the "rubyish" versions, what's left will go straight to solr
         opts.delete(:query)
@@ -123,20 +124,35 @@ module DelSolr
         when Hash
           query_string_array = []
           queries.each do |k,v|
-            if v.is_a?(Array) # add a filter for each value
-              v.each do |val|
-                query_string_array << "#{k}:#{val}"
-              end
-            elsif v.is_a?(Range)
-              query_string_array << "#{k}:[#{v.begin} TO #{v.end}]"
-            else
-              query_string_array << "#{k}:#{v}"
-            end
+            query_string_array << key_value_pair_string(k, v)
           end
           query_string = query_string_array.join(' ')
         end
         
         {key => query_string}
+      end
+
+      def key_value_pair_string(k, v)
+        str = ''
+        if v.is_a?(Array) # add a filter for each value
+          str_ary = []
+          v.each do |val|
+            str_ary << key_value_pair_string(k, val)
+          end
+          str = str_ary.join(' ')
+        elsif v.is_a?(Range)
+          str = "#{k}:[#{v.begin} TO #{v.end}]"
+        elsif v.is_a?(String)
+          if v =~ /\s/ && # if it contains a space, we may need to quote it
+             !(v =~ /^\[.+ TO .+\]$/) # HACK: if the string is a range query, do not wrap it in quotes
+            str = "#{k}:\"#{v}\""
+          else
+            str = "#{k}:#{v}"
+          end
+        else
+          str = "#{k}:#{v}"
+        end
+        str
       end
       
       def build_filters(key, filters)
@@ -147,18 +163,12 @@ module DelSolr
         when String
           params << {key => filters}
         when Array
-          filters.each { |f| params << {key => f} }
+          filters.each do |f|
+            params += build_filters(key, f) # recusively add all the filters in the array
+          end
         when Hash
           filters.each do |k,v|
-            if v.is_a?(Array) # add a filter for each value
-              v.each do |val|
-                params << {key => "#{k}:#{val}"}
-              end
-            elsif v.is_a?(Range)
-              params << {key => "#{k}:[#{v.begin} TO #{v.end}]"}
-            else
-              params << {key => "#{k}:#{v}"}
-            end
+            params << {key => key_value_pair_string(k, v)} unless v.nil?
           end
         end
         params

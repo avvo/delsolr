@@ -9,9 +9,12 @@ module DelSolr
       def initialize(solr_response_buffer, query_builder, options = {})
         @query_builder = query_builder
         @from_cache = options[:from_cache]
+        @logger = options[:logger]
         begin
           @raw_response = eval(solr_response_buffer)
-        rescue
+        rescue SyntaxError, Exception => e
+          @logger.error(solr_response_buffer) if @logger
+          @logger.error(e) if @logger
           @raw_response = nil
         end
 
@@ -30,6 +33,11 @@ module DelSolr
       def raw_response
         @raw_response
       end
+
+      # Did we get some kind of valid response back from solr?
+      def success?
+        !raw_response.nil?
+      end
       
       # Returns the total number of matches
       def total
@@ -38,7 +46,7 @@ module DelSolr
       
       # Returns true if there no results
       def blank?
-        total.zero?
+        raw_response.blank? || total < 1
       end
       
       alias_method :empty?, :blank?
@@ -73,6 +81,21 @@ module DelSolr
         raw_response['highlighting'] ||= {}
         raw_response['highlighting'][unique_id] ||= {}
         raw_response['highlighting'][unique_id][field]
+      end
+
+      def suggestions
+        @suggestions ||= raw_response['spellcheck']['suggestions'] if raw_response && raw_response['spellcheck']
+      end
+
+      # solr is super-weird about the way it returns suggestions,
+      # hence this strangeness:
+      # 'spellcheck'=>{'suggestions'=>['fishh',{'numFound'=>1,'startOffset'=>0,'endOffset'=>4,'suggestion'=>['fish']},'collation','fish']}
+      def collation
+        @collation ||= begin
+          collation = nil
+          suggestions.in_groups_of(2) {|k,v| collation = v if k == 'collation'} if suggestions
+          collation
+        end
       end
       
       # Returns the query time in ms
@@ -125,7 +148,7 @@ module DelSolr
       
       # Returns an array of value/counts for a given field (ie: ['true', 123, 'false', 20]
       def facet_field(field)
-        facet_fields[field.to_s]
+        facet_fields[field.to_s] || []
       end
       
       # Returns the array of field values for the given field in the order they were returned from solr
@@ -142,7 +165,7 @@ module DelSolr
       
       # Returns a hash of value/counts for a given field (ie: {'true' => 123, 'false' => 20}
       def facet_field_by_hash(field)
-        facet_fields_by_hash(field.to_s)
+        facet_fields_by_hash[field.to_s]
       end
       
       # Returns the count for the given field/value pair

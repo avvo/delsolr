@@ -18,10 +18,10 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert(qb)
     
     p = get_params(qb.request_string)
-    assert_equal(p['start'], '3')
-    assert_equal(p['rows'], '13')
-    assert_equal(p['fl'], 'id')
-    assert_equal(p['q'], 'good book')
+    assert_equal('3', p['start'])
+    assert_equal('13', p['rows'])
+    assert_equal('id', p['fl'])
+    assert_equal('good book', p['q'])
   end
   
   def test_002
@@ -36,8 +36,8 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert(qb)
     
     p = get_params(qb.request_string)
-    assert_equal(p['fl'], 'id,unique_id,score')
-    assert_equal(p['q'], 'blahblah')
+    assert_equal('id,unique_id,score', p['fl'])
+    assert_equal('blahblah', p['q'])
   end
   
   def test_003
@@ -52,8 +52,8 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert(qb)
     
     p = get_params(qb.request_string)
-    assert_equal(p['fl'], 'id,unique_id,score')
-    assert_equal(p['q'], 'index_type:books')
+    assert_equal('id,unique_id,score', p['fl'])
+    assert_equal('index_type:books', p['q'])
   end
   
   def test_004
@@ -68,8 +68,8 @@ class QueryBuilderTest < Test::Unit::TestCase
     assert(qb)
     
     p = get_params(qb.request_string)
-    assert_equal(p['fq'], 'location:seattle')
-    assert_equal(p['q'], 'index_type:books')
+    assert_equal('location:seattle', p['fq'])
+    assert_equal('index_type:books', p['q'])
   end
 
   def test_005
@@ -85,8 +85,8 @@ class QueryBuilderTest < Test::Unit::TestCase
 
     p = get_params(qb.request_string)
     
-    assert_equal(p['fq'], 'location:seattle')
-    assert_equal(p['q'], 'index_type:books')
+    assert_equal('location:seattle', p['fq'])
+    assert_equal('index_type:books', p['q'])
   end
   
   def test_facets_001
@@ -101,9 +101,9 @@ class QueryBuilderTest < Test::Unit::TestCase
     
     p = get_params(qb.request_string)
     
-    assert_equal(p['facet'], 'true')
-    assert_equal(p['facet.field'].sort, ['instock_b', 'on_sale_b'].sort)
-    assert_equal(p['f.on_sale_b.facet.limit'], '1')
+    assert_equal('true', p['facet'])
+    assert_equal(['instock_b', 'on_sale_b'].sort, p['facet.field'].sort)
+    assert_equal('1', p['f.on_sale_b.facet.limit'])
   end
   
   def test_facets_002
@@ -118,11 +118,28 @@ class QueryBuilderTest < Test::Unit::TestCase
     
     p = get_params(qb.request_string)
     
-    assert_equal(p['facet'], 'true')
-    assert_equal(p['facet.field'], 'language_idm')
-    assert_equal(p['facet.query'], 'city_idm:19596')
+    assert_equal('true', p['facet'])
+    assert_equal('language_idm', p['facet.field'])
+    assert_equal('{!key=seattle}city_idm:19596', p['facet.query'])
   end
-  
+
+  def test_facets_003
+    qb = nil
+    opts = {}
+    opts[:query] = "games"
+    opts[:facets] = [{:query => {:city_idm => 19596}, :localparams => {:key => 'seattle', :ex => 'exclusion'}}, {:field => 'language_idm'}]
+
+    assert_nothing_raised { qb = DelSolr::Client::QueryBuilder.new('onebox-books', opts) }
+
+    assert(qb)
+
+    p = get_params(qb.request_string)
+
+    assert_equal('true', p['facet'])
+    assert_equal('language_idm', p['facet.field'])
+    assert_equal('{!key=seattle ex=exclusion}city_idm:19596', p['facet.query'])
+  end
+
   def test_range
     qb = nil
     opts = {}
@@ -135,7 +152,7 @@ class QueryBuilderTest < Test::Unit::TestCase
     
     p = get_params(qb.request_string)
     
-    assert_equal('id:[1 TO 3]', p['fq'])
+    assert_equal(p['fq'], 'id:[1 TO 3]')
   end
 
   

@@ -30,10 +30,10 @@ Example:
 
     c = DelSolr::Client.new(:server => 'solr1', :port => 8983)
     rsp = c.query('dismax', :query => 'mp3 player',
-                            :filters => {:cost => (50..100)},
+                            :filters => {:cost => (50..100), :localparams => {:tag => 'cost_filter'}},
                             :facets => [{:field => 'brand', :limit => 10},
                                         {:query => {:onsale => true, :brand => 'Apple'},
-                                         :name => 'cheap_apple'}])
+                                         :localparams => {:key => 'cheap_apple', :ex => 'cost_filter'}}])
 
     # output total matches
     puts rsp.total
@@ -47,7 +47,7 @@ Example:
     end
 
     # output a query facet
-    puts "Cheap Apple stuff: #{rsp.facet_query_count_by_name('cheap_apple')}"
+    puts "Cheap Apple stuff: #{rsp.facet_query_count_by_key('cheap_apple')}"
 
     # adding things
     doc = DelSolr::Document.new
@@ -60,10 +60,13 @@ Example:
     rsp = c.query('dismax', :query => 'shuffle mp3 player')
     puts rsp.ids[0]
 
+	# using local params for filters / facets
+	Use :localparams => {} syntax to add local params to filters and facets
+
 
 == REQUIREMENTS:
 
-You need Solr installed somewhere so you can query it ;)
+You need Solr(1.4 or higher) installed somewhere so you can query it ;)
 
 == INSTALL:
 

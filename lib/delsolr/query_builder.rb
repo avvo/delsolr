@@ -1,13 +1,13 @@
 require 'cgi'
 
 module DelSolr
-  
+
   class Client
-    
+
     class QueryBuilder
-      
+
       FL_DEFAULTS = 'id,unique_id,score' # redefine if you really want to change this.
-      
+
       attr_accessor :query_name, :options
 
       # ops can basically be straight solr URL params, but it also supports some other formats
@@ -21,22 +21,17 @@ module DelSolr
       def request_string
         @request_string ||= build_request_string
       end
-      
-      # returns the query string of the facet query for the given query name (used for resolving counts for given queries)
-      def facet_query_by_name(query_name)
-        name_to_facet_query[query_name]
-      end
-      
-    private
-      
+
+      private
+
       def build_request_string()
         raise "query_name must be set" if query_name.blank?
-        
+
         opts = self.options.dup
-        
+
         # cleanup the nils
         opts.delete_if {|k,v| v.nil?}
-        
+
         # resolve "rubyish" names to solr names
         opts[:q] ||= opts[:query]
         opts[:rows] ||= opts[:limit] || 10
@@ -46,9 +41,9 @@ module DelSolr
         opts[:bq] ||= opts[:boost]
         opts[:suggestionCount] ||= opts[:suggestion_count]
         opts[:onlyMorePopular] ||= opts[:only_more_popular]
-        
+
         raise ":query or :q must be set" if opts[:q].nil? || opts[:q].empty?
-        
+
         # clear out the "rubyish" versions, what's left will go straight to solr
         opts.delete(:query)
         opts.delete(:limit)
@@ -57,7 +52,7 @@ module DelSolr
         opts.delete(:boost)
         opts.delete(:suggestion_count)
         opts.delete(:only_more_popular)
-        
+
         # needs to be an array of hashs because it's acceptable to have the same key present > once.
         params = []
 
@@ -88,7 +83,7 @@ module DelSolr
             raise 'facets must either be a Hash or an Array'
           end
         end
-        
+
         # handle friendly highlight name
         if opts.delete(:highlight)
           params << {:hl => 'true'}
@@ -109,12 +104,12 @@ module DelSolr
             raise "All params should be a Hash or String"
           end
         end
-        
+
         "/select?#{param_strings.join('&')}"
       end
-      
+
       # returns the query param
-      def build_query(key, queries)
+      def build_query(key, queries, localparams = "")
         query_string = ''
         case queries
         when String
@@ -128,7 +123,9 @@ module DelSolr
           end
           query_string = query_string_array.join(' ')
         end
-        
+
+        query_string = localparams + query_string
+
         {key => query_string}
       end
 
@@ -144,7 +141,7 @@ module DelSolr
           str = "#{k}:[#{v.begin} TO #{v.end}]"
         elsif v.is_a?(String)
           if v =~ /\s/ && # if it contains a space, we may need to quote it
-             !(v =~ /^\[.+ TO .+\]$/) # HACK: if the string is a range query, do not wrap it in quotes
+            !(v =~ /^\[.+ TO .+\]$/) # HACK: if the string is a range query, do not wrap it in quotes
             str = "#{k}:\"#{v}\""
           else
             str = "#{k}:#{v}"
@@ -154,10 +151,10 @@ module DelSolr
         end
         str
       end
-      
+
       def build_filters(key, filters)
         params = []
-        
+
         # handle "ruby-ish" filters
         case filters
         when String
@@ -167,13 +164,15 @@ module DelSolr
             params += build_filters(key, f) # recusively add all the filters in the array
           end
         when Hash
+          filters_local_params = build_local_params(filters['localparams'] || filters[:localparams])
           filters.each do |k,v|
-            params << {key => key_value_pair_string(k, v)} unless v.nil?
+            next if ['localparams', :localparams].include?(k.to_s)
+            params << {key => filters_local_params + key_value_pair_string(k, v)} unless v.nil?
           end
         end
         params
       end
-      
+
       def build_facets(facet_array)
         params = []
         facet_array.each do |facet_hash|
@@ -181,34 +180,53 @@ module DelSolr
         end
         params
       end
-      
+
       def build_facet(facet_hash)
         params = []
         facet_name = facet_hash['name'] || facet_hash[:name]
+        unless facet_name.blank?
+          facet_hash[:localparams] ||= {}
+          facet_hash[:localparams][:key] ||= facet_name
+        end
+        facet_local_params = build_local_params(facet_hash['localparams'] || facet_hash[:localparams])
         facet_hash.each do |k,v|
           # handle some cases specially
           if 'field' == k.to_s
-            params << {"facet.field" => v}
+            params << {"facet.field" => "#{facet_local_params}#{v}"}
           elsif 'query' == k.to_s
-            q = build_query("facet.query", v)
-            params << q
-            if facet_name
-              # keep track of names => facet_queries
-              name_to_facet_query[facet_name] = q['facet.query']
-            end
-          elsif ['name', :name].include?(k.to_s)
+            params << build_query("facet.query", v, facet_local_params)
+          elsif ['localparams', :localparams, 'name', :name].include?(k.to_s)
             # do nothing
           else
-            params << {"f.#{facet_hash[:field]}.facet.#{k}" => v}
+            params << {"f.#{facet_hash[:field]}.facet.#{k}" => "#{facet_local_params}#{v}"}
           end
         end
         params
       end
-      
-      def name_to_facet_query
-        @name_to_facet_query ||= {}
+
+      def build_local_params_array(local_params)
+        local_params_array = []
+        case local_params
+        when String
+          local_params_array << local_params
+        when Array
+          local_params.each do |p|
+            local_params_array << build_local_params_array(p)
+          end
+        when Hash
+          local_params.each do |k,v|
+            local_params_array << "#{k}=#{v}"
+          end
+        end
+        local_params_array
       end
-      
+
+      def build_local_params(local_params)
+        local_params_array = build_local_params_array(local_params)
+
+        local_params_array.empty? ? "" : "{!#{local_params_array.join(" ")}}"
+      end
+
     end
   end
 end

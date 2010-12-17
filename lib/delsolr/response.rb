@@ -174,10 +174,10 @@ module DelSolr
       end
       
       # Returns the counts for a given facet_query_name
-      def facet_query_count_by_name(facet_query_name)
-        query_string = query_builder.facet_query_by_name(facet_query_name)
-        facet_queries[query_string] if query_string
+      def facet_query_count_by_key(facet_query_key)
+        facet_queries[facet_query_key.to_s]
       end
+      alias :facet_query_count_by_name :facet_query_count_by_key
       
       # Returns the url sent to solr
       def request_url

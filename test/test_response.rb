@@ -75,7 +75,7 @@ class ResponseTest < Test::Unit::TestCase
      },
      'facet_counts'=>{
       'facet_queries'=>{
-        'city_idm:19596' => 392},
+        '19596' => 392},
       'facet_fields'=>{
         'available_b'=>[
           'false',1328],
@@ -97,7 +97,7 @@ class ResponseTest < Test::Unit::TestCase
   
   def test_001
     r = nil
-    qb = DelSolr::Client::QueryBuilder.new('standard', :query => {:index_type => 'widget'}, :facets => {:query => 'city_idm:19596', :name => 19596} )
+    qb = DelSolr::Client::QueryBuilder.new('standard', :query => {:index_type => 'widget'}, :facets => {:query => 'city_idm:19596', :prefix => {:key => 19596}} )
     qb.request_string # need to generate this...
     assert_nothing_raised { r = DelSolr::Client::Response.new(@@test_001, qb) }
     
@@ -114,12 +114,12 @@ class ResponseTest < Test::Unit::TestCase
     assert_equal(1182, r.facet_field_count('onsale_b', false))
     assert_equal(174, r.facet_field_count('onsale_b', true))
     assert_equal(1328, r.facet_field_count('available_b', false))
-    assert_equal(392, r.facet_query_count_by_name(19596))
+    assert_equal(392, r.facet_query_count_by_key(19596))
   end
   
   def test_shortcuts
     r = nil
-    qb = DelSolr::Client::QueryBuilder.new('standard', :query => {:index_type => 'widget'}, :facets => {:query => 'city_idm:19596', :name => 19596} )
+    qb = DelSolr::Client::QueryBuilder.new('standard', :query => {:index_type => 'widget'}, :facets => {:query => 'city_idm:19596', :prefix => {:key => 19596}} )
     qb.request_string # need to generate this...
     assert_nothing_raised { r = DelSolr::Client::Response.new(@@test_001, qb, :shortcuts => [:index_type, :id]) }
     

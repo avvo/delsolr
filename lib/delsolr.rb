@@ -100,7 +100,7 @@ module DelSolr
     #   
     #          c.query('standard', :query => 'abc',
     #                              :facets => [:query => {:city => 'seattle', :instock => true},
-    #                                          :name => 'seattle_instock'}])
+    #                                          :prefix => {:key => 'seattle_instock'}}])
     #          
     #   ...will request counts for the number of documents where "seattle" matches on the "city" field and "instock" is set to true.
     #   Faceting by query requires you to assign a name to the facet so the counts can easily be fetched from the response.  Solr 
@@ -109,7 +109,7 @@ module DelSolr
     #    
     #   The count for this facet query can be pulled like so:
     #   
-    #          rsp.facet_query_count_by_name('seattle_instock').
+    #          rsp.facet_query_count_by_key('seattle_instock').
     # 
     # [<b><tt>:sorts</tt></b>]
     #   (optional) array or string of sorts in Lucene syntax (<fieldname> <asc/desc>)

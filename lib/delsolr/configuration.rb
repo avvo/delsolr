@@ -9,6 +9,10 @@ module DelSolr
         @timeout = timeout || 120
         @path = path || '/solr'
       end
+      
+      def full_path
+        "#{self.server}:#{self.port}#{self.path}"
+      end
 
     end
   end

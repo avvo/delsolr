@@ -189,7 +189,7 @@ module DelSolr
       end
 
       response = DelSolr::Client::Response.new(body, query_builder, :logger => logger, :from_cache => from_cache, :shortcuts => @shortcuts)
-      logger.info "#{from_cache ? 'C' : 'S'},#{from_cache ? cache_time : response.qtime},#{response.total},http://#{configuration.server}:#{configuration.port}#{response.request_url}" if logger && response && response.success?
+      logger.info "#{from_cache ? 'C' : 'S'},#{from_cache ? cache_time : response.qtime},#{response.total},http://#{configuration.full_path}#{response.request_url}" if logger && response
       response
     end
     

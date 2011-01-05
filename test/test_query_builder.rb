@@ -137,7 +137,9 @@ class QueryBuilderTest < Test::Unit::TestCase
 
     assert_equal('true', p['facet'])
     assert_equal('language_idm', p['facet.field'])
-    assert_equal('{!key=seattle ex=exclusion}city_idm:19596', p['facet.query'])
+    assert_match('city_idm:19596', p['facet.query'])
+    assert_match('key=seattle', p['facet.query'])
+    assert_match('ex=exclusion', p['facet.query'])
   end
 
   def test_range

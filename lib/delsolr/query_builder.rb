@@ -198,7 +198,7 @@ module DelSolr
           elsif ['localparams', :localparams, 'name', :name].include?(k.to_s)
             # do nothing
           else
-            params << {"f.#{facet_hash[:field]}.facet.#{k}" => "#{facet_local_params}#{v}"}
+            params << {"f.#{facet_hash[:field]}.facet.#{k}" => "#{v}"}
           end
         end
         params

@@ -189,16 +189,27 @@ module DelSolr
           facet_hash[:localparams][:key] ||= facet_name
         end
         facet_local_params = build_local_params(facet_hash['localparams'] || facet_hash[:localparams])
+
+        field_name = nil
+
+        if facet_hash[:field]
+          field_name = facet_hash[:field]
+        elsif facet_hash[:range]
+          field_name = facet_hash[:range]
+        elsif facet_hash[:date]
+          field_name = facet_hash[:date]
+        end
+
         facet_hash.each do |k,v|
           # handle some cases specially
-          if 'field' == k.to_s
-            params << {"facet.field" => "#{facet_local_params}#{v}"}
+          if ['field', 'range', 'date'].include? k.to_s
+            params << {"facet.#{k}" => "#{facet_local_params}#{v}"}
           elsif 'query' == k.to_s
             params << build_query("facet.query", v, facet_local_params)
           elsif ['localparams', :localparams, 'name', :name].include?(k.to_s)
             # do nothing
           else
-            params << {"f.#{facet_hash[:field]}.facet.#{k}" => "#{v}"}
+            params << {"f.#{field_name}.facet.#{k}" => "#{v}"}
           end
         end
         params

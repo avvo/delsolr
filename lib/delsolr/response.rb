@@ -5,6 +5,7 @@ module DelSolr
     class Response
 
       attr_reader :query_builder
+      attr_accessor :docs, :facet_dates, :facet_fields_by_hash # We're merging results into this array - so need to be able to set it.
 
       def initialize(solr_response_buffer, query_builder, options = {})
         @query_builder = query_builder
@@ -70,7 +71,7 @@ module DelSolr
       def docs
         @docs ||= raw_response['response']['docs']
       end
-      
+     
       # Helper for displaying a given field (first tries the highlight, then the stored value)
       def display_for(doc, field)
         highlights_for(doc['unique_id'], field) || doc[field]
@@ -127,7 +128,12 @@ module DelSolr
       def facet_queries
         @facet_queries ||= facets['facet_queries'] || {}
       end
-      
+     
+      # Returns all facet dates
+      def facet_dates
+        @facet_dates ||= facets['facet_dates'] || {}
+      end
+
       # Returns a hash of hashs rather than a hash of arrays (ie: {'instock_b' => {'true' => 123', 'false', => 20} })
       def facet_fields_by_hash
         @facet_fields_by_hash ||= begin

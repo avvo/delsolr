@@ -176,6 +176,19 @@ class ClientTest < Test::Unit::TestCase
     assert(c.update!(doc))
     assert_equal(0, c.pending_documents.length)
   end
+
+  def test_query_returns_nil_when_exception_thrown
+    c = setup_client
+
+    mock_query_builder = DelSolr::Client::QueryBuilder
+    mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
+    DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
+    c.connection.expects(:get).raises(StandardError) # mock the connection
+    assert_nothing_raised do
+      r = c.query('standard', :query => '123')
+      assert_nil(r)
+    end
+  end
   
   def test_query_with_path
     c = setup_client(:path => '/abcsolr')

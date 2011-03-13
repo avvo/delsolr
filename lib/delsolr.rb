@@ -166,12 +166,7 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        begin
-          header, body = connection.get(configuration.path + query_builder.request_string)
-        rescue Timeout::Error
-          # If we timed out, just return nil and let the client decide what to do
-          return nil
-        end
+        header, body = connection.get(configuration.path + query_builder.request_string)
 
         # We get UTF-8 from Solr back, make sure the string knows about it
         # when running on Ruby >= 1.9
@@ -196,6 +191,10 @@ module DelSolr
         logger.info "#{from_cache ? 'C' : 'S'},#{response_stat_string}http://#{configuration.full_path}#{response.request_url}"
       end
       response
+    # If we error, just return nil and let the client decide what to do
+    rescue StandardError
+      logger.info "http://#{configuration.full_path}#{query_builder.request_string}" if logger && configuration && query_builder
+      return nil
     end
     
     # Adds a document to the buffer to be posted to solr (NOTE: does not perform the actual post)

@@ -166,8 +166,7 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        header, body = connection.get(configuration.path + query_builder.request_string)
-
+        header, body = connection.post("#{configuration.path}/select", query_builder.request_string)
         # We get UTF-8 from Solr back, make sure the string knows about it
         # when running on Ruby >= 1.9
         if body.respond_to?(:force_encoding)
@@ -188,7 +187,7 @@ module DelSolr
         if response && response.success?
           response_stat_string = "#{from_cache ? cache_time : response.qtime},#{response.total},"
         end
-        logger.info "#{from_cache ? 'C' : 'S'},#{response_stat_string}http://#{configuration.full_path}#{response.request_url}"
+        logger.info "#{from_cache ? 'C' : 'S'},#{response_stat_string}http://#{configuration.full_path}/select?#{response.request_url}"
       end
       response
     # If we error, just return nil and let the client decide what to do

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    delsolr (0.0.6)
+    delsolr (0.1.4)
 
 GEM
   remote: http://rubygems.org/

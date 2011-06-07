@@ -105,7 +105,7 @@ module DelSolr
           end
         end
 
-        "/select?#{param_strings.join('&')}"
+        param_strings.join('&')
       end
 
       # returns the query param

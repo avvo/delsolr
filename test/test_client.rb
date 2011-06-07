@@ -183,7 +183,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:get).raises(StandardError) # mock the connection
+    c.connection.expects(:post).raises(StandardError) # mock the connection
     assert_nothing_raised do
       r = c.query('standard', :query => '123')
       assert_nil(r)
@@ -196,7 +196,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:get).with("/abcsolr" + mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/abcsolr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
     r = c.query('standard', :query => '123')
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -209,7 +209,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:get).with("/solr" + mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
     r = c.query('standard', :query => '123')
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -223,7 +223,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:get).with("/solr" + mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
     r = c.query('standard', :query => '123', :enable_caching => true)
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -242,7 +242,7 @@ class ClientTest < Test::Unit::TestCase
       mock_query_builder = DelSolr::Client::QueryBuilder
       mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
       DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-      c.connection.expects(:get).with("/solr" + mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+      c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
       r = c.query('standard', :query => '123')
       assert(r)
 

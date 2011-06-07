@@ -162,8 +162,7 @@ private
   
   # given a url returns a hash of the query params (for each duplicate key, it returns an array)
   def get_params(url)
-    query = URI.parse(url).query
-    query = query.split('&')
+    query = url.split('&')
     h = {}
     query.each do |p|
       a = p.split('=')

@@ -6,23 +6,23 @@ require 'mocha'
 class ClientTest < Test::Unit::TestCase
 
   include Test::Unit::Assertions
-  
+
   SUCCESS = '<result status="0"></result>'
   FAILURE = '<result status="1"></result>'
   CONTENT_TYPE = {'Content-type' => 'text/xml;charset=utf-8'}
-  
-  class TestCache    
+
+  class TestCache
     def set(k,v,t)
       @cache ||= {}
       @cache[k] = v
     end
-    
+
     def get(k)
       @cache ||= {}
       @cache[k]
-    end    
+    end
   end
-  
+
   @@response_buffer = %{
     {
      'responseHeader'=>{
@@ -113,7 +113,7 @@ class ClientTest < Test::Unit::TestCase
       '11_widget'=>{},
       '12_widget'=>{}}}
   }
-  
+
   def test_create
     s = nil
     assert_nothing_raised do
@@ -121,7 +121,7 @@ class ClientTest < Test::Unit::TestCase
     end
     assert(s)
   end
-  
+
   def test_commit_success
     c = setup_client
     c.connection.expects(:post).once.returns([nil,SUCCESS])
@@ -133,7 +133,7 @@ class ClientTest < Test::Unit::TestCase
     c.connection.expects(:post).once.returns([nil,FAILURE])
     assert(!c.commit!)
   end
-  
+
   def test_optimize_success
     c = setup_client
     c.connection.expects(:post).once.returns([nil,SUCCESS])
@@ -145,19 +145,19 @@ class ClientTest < Test::Unit::TestCase
     c.connection.expects(:post).once.returns([nil,FAILURE])
     assert(!c.optimize!)
   end
-  
+
   def test_update
     c = setup_client
-    
+
     doc = DelSolr::Document.new
     doc.add_field(:id, 123)
     doc.add_field(:name, 'mp3 player')
-    
+
     expected_post_data = "<add>\n#{doc.xml}\n</add>\n"
-    
+
     assert(c.update(doc))
     assert_equal(1, c.pending_documents.length)
-    
+
     c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
     assert(c.post_update!)
     assert_equal(0, c.pending_documents.length)
@@ -165,15 +165,29 @@ class ClientTest < Test::Unit::TestCase
 
   def test_update!
     c = setup_client
-    
+
     doc = DelSolr::Document.new
     doc.add_field(:id, 123)
     doc.add_field(:name, 'mp3 player')
-    
+
     expected_post_data = "<add>\n#{doc.xml}\n</add>\n"
-    
+
     c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
     assert(c.update!(doc))
+    assert_equal(0, c.pending_documents.length)
+  end
+
+  def test_bang_update_with_options
+    c = setup_client
+
+    doc = DelSolr::Document.new
+    doc.add_field(:id, 123)
+    doc.add_field(:name, 'mp3 player')
+
+    expected_post_data = "<add commitWithin=\"1000\">\n#{doc.xml}\n</add>\n"
+
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    assert(c.update!(doc, :commitWithin => 1000))
     assert_equal(0, c.pending_documents.length)
   end
 
@@ -189,10 +203,10 @@ class ClientTest < Test::Unit::TestCase
       assert_nil(r)
     end
   end
-  
+
   def test_query_with_path
     c = setup_client(:path => '/abcsolr')
-    
+
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
@@ -216,10 +230,10 @@ class ClientTest < Test::Unit::TestCase
     assert(!r.from_cache?, 'should not be from cache')
   end
 
-  
+
   def test_query_from_cache
     c = setup_client(:cache => TestCache.new)
-    
+
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
@@ -257,10 +271,10 @@ class ClientTest < Test::Unit::TestCase
       ensure_encoding.call(r.raw_response)
     end
   end
-  
-  
+
+
 private
-  
+
   def setup_client(options = {})
     DelSolr::Client.new({:server => 'localhost', :port => 8983}.merge(options))
   end

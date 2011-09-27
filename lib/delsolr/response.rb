@@ -90,12 +90,25 @@ module DelSolr
       # solr is super-weird about the way it returns suggestions,
       # hence this strangeness:
       # 'spellcheck'=>{'suggestions'=>['fishh',{'numFound'=>1,'startOffset'=>0,'endOffset'=>4,'suggestion'=>['fish']},'collation','fish']}
-      def collation
-        @collation ||= begin
-          collation = nil
-          suggestions.in_groups_of(2) {|k,v| collation = v if k == 'collation'} if suggestions
-          collation
+      def collation_with_correction
+        @collation_with_correction ||= begin
+          collation, correction = nil, {}
+          if suggestions
+            suggestions.in_groups_of(2) do |k,v|
+              collation = v if k == 'collation'
+              correction[k] = v['suggestion'][0] if v.is_a?(Hash)
+            end
+          end
+          {'collation' => collation, 'correction' => correction}
         end
+      end
+
+      def correction
+        collation_with_correction['correction']
+      end
+
+      def collation
+        collation_with_correction['collation']
       end
       
       # Returns the query time in ms

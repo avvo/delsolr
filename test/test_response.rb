@@ -92,7 +92,11 @@ class ResponseTest < Test::Unit::TestCase
       '9_widget'=>{},
       '10_widget'=>{},
       '11_widget'=>{},
-      '12_widget'=>{}}}
+      '12_widget'=>{}},
+      'spellcheck'=>{
+        'suggestions'=>[
+          'fishh',{'numFound'=>1,'startOffset'=>0,'endOffset'=>4,'suggestion'=>['fish']},
+          'collation','fish']}}
   }
   
   def test_001
@@ -126,6 +130,16 @@ class ResponseTest < Test::Unit::TestCase
     assert(r.respond_to?(:index_types))
     assert(r.respond_to?(:ids))
     assert(!r.respond_to?(:scores))
+  end
+
+  def test_spellcheck
+    r = nil
+    qb = DelSolr::Client::QueryBuilder.new('standard', :query => {:index_type => 'widget'}, :facets => {:query => 'city_idm:19596', :prefix => {:key => 19596}} )
+    qb.request_string # need to generate this...
+    assert_nothing_raised { r = DelSolr::Client::Response.new(@@test_001, qb) }
+
+    assert_equal('fish', r.collation)
+    assert_equal('fish', r.correction['fishh'])
   end
 
 end

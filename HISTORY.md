@@ -1,5 +1,8 @@
 Version Changes
 ===============
+0.1.6
+-----
+* Added a way to return spelling correction per word
 
 0.1.5
 ------

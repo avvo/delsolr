@@ -94,7 +94,9 @@ module DelSolr
         @collation_with_correction ||= begin
           collation, correction = nil, {}
           if suggestions
-            suggestions.in_groups_of(2) do |k,v|
+            (suggestions.length/2).times do |i|
+              k = suggestions[i*2]
+              v = suggestions[i*2+1]
               collation = v if k == 'collation'
               correction[k] = v['suggestion'][0] if v.is_a?(Hash)
             end

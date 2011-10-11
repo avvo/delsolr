@@ -128,9 +128,11 @@ class ClientTest < Test::Unit::TestCase
     assert(c.commit!)
   end
 
-  def test_commit_failure
-    c = setup_client
+  def test_commit_success
+    logger = stub_everything
+    c = setup_client(:logger => logger)
     c.connection.expects(:post).once.returns([nil,FAILURE])
+    logger.expects(:error).with(FAILURE)
     assert(!c.commit!)
   end
 
@@ -141,8 +143,10 @@ class ClientTest < Test::Unit::TestCase
   end
 
   def test_optimize_failure
-    c = setup_client
+    logger = stub_everything
+    c = setup_client(:logger => logger)
     c.connection.expects(:post).once.returns([nil,FAILURE])
+    logger.expects(:error).with(FAILURE)
     assert(!c.optimize!)
   end
 
@@ -161,6 +165,31 @@ class ClientTest < Test::Unit::TestCase
     c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
     assert(c.post_update!)
     assert_equal(0, c.pending_documents.length)
+  end
+  
+  def test_error_logged_if_update_fails
+    logger = stub_everything
+    c = setup_client(:logger => logger)
+
+    doc = DelSolr::Document.new
+    doc.add_field(:id, 123)
+    doc.add_field(:name, 'mp3 player')
+
+    c.update(doc)
+    fail_response =
+      "<html>
+      <head>
+      <meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>
+      <title>Error 400 ERROR:unknown field 'priority'</title>
+      </head>
+      <body><h2>HTTP ERROR 400</h2>
+      <p>Problem accessing /solr/update. Reason:
+      <pre>    ERROR:unknown field 'priority'</pre></p>
+      </body>
+      </html>"
+    c.connection.expects(:post).returns([nil, fail_response])
+    logger.expects(:error).with(fail_response)
+    c.post_update!
   end
 
   def test_update!

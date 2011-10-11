@@ -218,7 +218,7 @@ module DelSolr
     # posts the buffer created by <tt>update</tt> to solr
     def post_update!(options = {})
       h,b = post(prepare_update_xml(options))
-      success?(b)
+      success?(b) or log_error(b)
     end
 
     # deletes <tt>unique_id</tt> from the index
@@ -235,13 +235,13 @@ module DelSolr
     # commits all pending adds/deletes
     def commit!
       h,b = post("<commit/>")
-      success?(b)
+      success?(b) or log_error(b)
     end
 
     # posts the optimize directive to solr
     def optimize!
       h,b = post("<optimize/>")
-      success?(b)
+      success?(b) or log_error(b)
     end
 
     # accessor to the connection instance
@@ -285,5 +285,9 @@ module DelSolr
       response_body == '<result status="0"></result>'
     end
 
+    def log_error(response_body)
+      return unless logger
+      logger.error(response_body)
+    end
   end
 end

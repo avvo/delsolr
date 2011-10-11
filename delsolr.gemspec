@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
     "test/test_response.rb"
   ]
   s.add_development_dependency(%q{mocha}, [">= 0.9.0"])
+  s.add_development_dependency("rake", ["0.9.2"])
 end

@@ -301,7 +301,14 @@ class ClientTest < Test::Unit::TestCase
     end
   end
 
-
+  def test_delete
+    c = setup_client
+    id = 123
+    expected_post_data = "<delete><id>#{id}</id></delete>"
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    assert(c.delete(id))
+  end
+  
 private
 
   def setup_client(options = {})

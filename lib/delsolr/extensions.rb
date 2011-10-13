@@ -3,7 +3,7 @@
 #
 
 String.class_eval do
-  if !''.respond_to?(:blank?)    
+  if !''.respond_to?(:blank?)
     def blank?
       self == ''
     end
@@ -32,4 +32,18 @@ Fixnum.class_eval do
       self * 60 * 60
     end
   end
+end
+
+class Hash
+
+  def to_xml_attribute_string
+    opts = []
+    self.each do |k,v|
+      opts.push "#{k}=\"#{v}\""
+    end
+    opts = opts.join(" ")
+    opts = " " + opts unless opts.blank?
+    opts
+  end
+
 end

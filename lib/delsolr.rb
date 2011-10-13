@@ -224,12 +224,13 @@ module DelSolr
     # deletes <tt>unique_id</tt> from the index
     def delete(unique_id)
       h,b = post("<delete><id>#{unique_id}</id></delete>")
-      success?(b)
+      success?(b) or log_error(b)
     end
 
-    # not implemented
+    # deletes documents matching <tt>query</tt> from the index
     def delete_by_query(query)
-      raise 'not implemented yet :('
+      h,b = post("<delete><query>#{query}</query></delete>")
+      success?(b) or log_error(b)
     end
 
     # commits all pending adds/deletes
@@ -282,7 +283,8 @@ module DelSolr
     end
 
     def success?(response_body)
-      response_body == '<result status="0"></result>'
+      response_body.include?('<result status="0"></result>') || 
+        response_body.include?('<lst name="responseHeader"><int name="status">0</int>')
     end
 
     def log_error(response_body)

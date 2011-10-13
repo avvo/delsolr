@@ -8,6 +8,10 @@ class ClientTest < Test::Unit::TestCase
   include Test::Unit::Assertions
 
   SUCCESS = '<result status="0"></result>'
+  SOLR_34_SUCCESS = %Q{<?xml version="1.0" encoding="UTF-8"?>
+<response>
+<lst name="responseHeader"><int name="status">0</int><int name="QTime">4</int></lst>
+</response>}
   FAILURE = '<result status="1"></result>'
   CONTENT_TYPE = {'Content-type' => 'text/xml;charset=utf-8'}
 
@@ -128,6 +132,12 @@ class ClientTest < Test::Unit::TestCase
     assert(c.commit!)
   end
 
+  def test_solr_34_success_response_accepted
+    c = setup_client
+    c.connection.expects(:post).once.returns([nil,SOLR_34_SUCCESS])
+    assert(c.commit!)
+  end
+  
   def test_commit_success
     logger = stub_everything
     c = setup_client(:logger => logger)
@@ -309,6 +319,13 @@ class ClientTest < Test::Unit::TestCase
     assert(c.delete(id))
   end
   
+  def test_delete_by_query
+    c = setup_client
+    query = "*:*"
+    expected_post_data = "<delete><query>#{query}</query></delete>"
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    assert(c.delete_by_query(query))
+  end
 private
 
   def setup_client(options = {})

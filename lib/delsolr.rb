@@ -166,7 +166,9 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        header, body = connection.post("#{configuration.path}/select", query_builder.request_string)
+        response = connection.post("#{configuration.path}/select", query_builder.request_string)
+        body = response.body
+        
         # We get UTF-8 from Solr back, make sure the string knows about it
         # when running on Ruby >= 1.9
         if body.respond_to?(:force_encoding)

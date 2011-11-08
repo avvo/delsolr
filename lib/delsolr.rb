@@ -219,32 +219,32 @@ module DelSolr
 
     # posts the buffer created by <tt>update</tt> to solr
     def post_update!(options = {})
-      h,b = post(prepare_update_xml(options))
-      success?(b) or log_error(b)
+      rsp = post(prepare_update_xml(options))
+      success?(rsp.body) or log_error(rsp.body)
     end
 
     # deletes <tt>unique_id</tt> from the index
     def delete(unique_id)
-      h,b = post("<delete><id>#{unique_id}</id></delete>")
-      success?(b) or log_error(b)
+      rsp = post("<delete><id>#{unique_id}</id></delete>")
+      success?(rsp.body) or log_error(rsp.body)
     end
 
     # deletes documents matching <tt>query</tt> from the index
     def delete_by_query(query)
-      h,b = post("<delete><query>#{query}</query></delete>")
-      success?(b) or log_error(b)
+      rsp = post("<delete><query>#{query}</query></delete>")
+      success?(rsp.body) or log_error(rsp.body)
     end
 
     # commits all pending adds/deletes
     def commit!
-      h,b = post("<commit/>")
-      success?(b) or log_error(b)
+      rsp = post("<commit/>")
+      success?(rsp.body) or log_error(rsp.body)
     end
 
     # posts the optimize directive to solr
     def optimize!
-      h,b = post("<optimize/>")
-      success?(b) or log_error(b)
+      rsp = post("<optimize/>")
+      success?(rsp.body) or log_error(rsp.body)
     end
 
     # accessor to the connection instance

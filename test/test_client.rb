@@ -128,34 +128,34 @@ class ClientTest < Test::Unit::TestCase
 
   def test_commit_success
     c = setup_client
-    c.connection.expects(:post).once.returns([nil,SUCCESS])
+    c.connection.expects(:post).once.returns(build_http_response(SUCCESS))
     assert(c.commit!)
   end
 
   def test_solr_34_success_response_accepted
     c = setup_client
-    c.connection.expects(:post).once.returns([nil,SOLR_34_SUCCESS])
+    c.connection.expects(:post).once.returns(build_http_response(SOLR_34_SUCCESS))
     assert(c.commit!)
   end
   
   def test_commit_success
     logger = stub_everything
     c = setup_client(:logger => logger)
-    c.connection.expects(:post).once.returns([nil,FAILURE])
+    c.connection.expects(:post).once.returns(build_http_response(FAILURE))
     logger.expects(:error).with(FAILURE)
     assert(!c.commit!)
   end
 
   def test_optimize_success
     c = setup_client
-    c.connection.expects(:post).once.returns([nil,SUCCESS])
+    c.connection.expects(:post).once.returns(build_http_response(SUCCESS))
     assert(c.optimize!)
   end
 
   def test_optimize_failure
     logger = stub_everything
     c = setup_client(:logger => logger)
-    c.connection.expects(:post).once.returns([nil,FAILURE])
+    c.connection.expects(:post).once.returns(build_http_response(FAILURE))
     logger.expects(:error).with(FAILURE)
     assert(!c.optimize!)
   end
@@ -172,7 +172,7 @@ class ClientTest < Test::Unit::TestCase
     assert(c.update(doc))
     assert_equal(1, c.pending_documents.length)
 
-    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns(build_http_response(SUCCESS))
     assert(c.post_update!)
     assert_equal(0, c.pending_documents.length)
   end
@@ -197,7 +197,7 @@ class ClientTest < Test::Unit::TestCase
       <pre>    ERROR:unknown field 'priority'</pre></p>
       </body>
       </html>"
-    c.connection.expects(:post).returns([nil, fail_response])
+    c.connection.expects(:post).returns(build_http_response(fail_response))
     logger.expects(:error).with(fail_response)
     c.post_update!
   end
@@ -211,7 +211,7 @@ class ClientTest < Test::Unit::TestCase
 
     expected_post_data = "<add>\n#{doc.xml}\n</add>\n"
 
-    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns(build_http_response(SUCCESS))
     assert(c.update!(doc))
     assert_equal(0, c.pending_documents.length)
   end
@@ -225,7 +225,7 @@ class ClientTest < Test::Unit::TestCase
 
     expected_post_data = "<add commitWithin=\"1000\">\n#{doc.xml}\n</add>\n"
 
-    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns(build_http_response(SUCCESS))
     assert(c.update!(doc, :commitWithin => 1000))
     assert_equal(0, c.pending_documents.length)
   end
@@ -249,7 +249,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:post).with("/abcsolr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/abcsolr/select", mock_query_builder.request_string).returns(build_http_response(@@response_buffer)) # mock the connection
     r = c.query('standard', :query => '123')
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -262,7 +262,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns(build_http_response(@@response_buffer)) # mock the connection
     r = c.query('standard', :query => '123')
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -276,7 +276,7 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder = DelSolr::Client::QueryBuilder
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+    c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns(build_http_response(@@response_buffer)) # mock the connection
     r = c.query('standard', :query => '123', :enable_caching => true)
     assert(r)
     assert_equal([1,3,4,5,7,8,9,10,11,12], r.ids.sort)
@@ -295,7 +295,7 @@ class ClientTest < Test::Unit::TestCase
       mock_query_builder = DelSolr::Client::QueryBuilder
       mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
       DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
-      c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns([nil, @@response_buffer]) # mock the connection
+      c.connection.expects(:post).with("/solr/select", mock_query_builder.request_string).returns(build_http_response(@@response_buffer)) # mock the connection
       r = c.query('standard', :query => '123')
       assert(r)
 
@@ -315,7 +315,7 @@ class ClientTest < Test::Unit::TestCase
     c = setup_client
     id = 123
     expected_post_data = "<delete><id>#{id}</id></delete>"
-    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns(build_http_response(SUCCESS))
     assert(c.delete(id))
   end
   
@@ -323,13 +323,19 @@ class ClientTest < Test::Unit::TestCase
     c = setup_client
     query = "*:*"
     expected_post_data = "<delete><query>#{query}</query></delete>"
-    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns([nil,SUCCESS])
+    c.connection.expects(:post).with('/solr/update', expected_post_data, CONTENT_TYPE).returns(build_http_response(SUCCESS))
     assert(c.delete_by_query(query))
   end
 private
 
   def setup_client(options = {})
     DelSolr::Client.new({:server => 'localhost', :port => 8983}.merge(options))
+  end
+  
+  def build_http_response(body)
+    response = Net::HTTPOK.new('1.1', '200', 'OK')
+    response.stubs(:body).returns(body)
+    response
   end
 
 end

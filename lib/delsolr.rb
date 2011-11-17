@@ -175,27 +175,26 @@ module DelSolr
           body.force_encoding("UTF-8")
         end
 
-        # add to the cache if caching
-        if enable_caching
-          begin
-            @cache.set(cache_key, body, ttl)
-          rescue
-          end
-        end
       end
 
       response = DelSolr::Client::Response.new(body, query_builder, :logger => logger, :from_cache => from_cache, :shortcuts => @shortcuts)
-      if logger
-        if response && response.success?
-          response_stat_string = "#{from_cache ? cache_time : response.qtime},#{response.total},"
-        end
-        logger.info "#{from_cache ? 'C' : 'S'},#{response_stat_string}http://#{configuration.full_path}/select?#{response.request_url}"
+      
+      url = "http://#{configuration.full_path}/select?#{query_builder.request_string}"
+      if response && response.success?
+        log_query_success(url, response, from_cache, (from_cache ? cache_time : response.qtime))
+      else
+        # The response from solr will already be logged, but we should also
+        # log the full url to make debugging easier
+        log_query_error(url)
       end
+      
+      # Cache successful responses that don't come from the cache
+      if response && response.success? && enable_caching && !from_cache
+        # add to the cache if caching
+        @cache.set(cache_key, body, ttl)
+      end
+      
       response
-    # If we error, just return nil and let the client decide what to do
-    rescue StandardError
-      logger.info "http://#{configuration.full_path}#{query_builder.request_string}" if logger && configuration && query_builder
-      return nil
     end
 
     # Adds a document to the buffer to be posted to solr (NOTE: does not perform the actual post)
@@ -268,7 +267,21 @@ module DelSolr
     end
 
     private
-
+    
+    def log_query_success(url, response, from_cache, query_time)
+      if logger
+        l = []
+        l << "#{query_time}ms"
+        l << (from_cache ? "CACHE" : "SOLR")
+        l << url
+        logger.info l.join(' ')
+      end
+    end
+    
+    def log_query_error(url)
+      logger.error "ERROR #{url}" if logger
+    end
+    
     # returns the update xml buffer
     def prepare_update_xml(options = {})
       r = ["<add#{options.to_xml_attribute_string}>\n"]

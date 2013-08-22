@@ -6,9 +6,7 @@
 # see README.txt
 #
 
-
-require 'net/http'
-
+require 'faraday'
 require 'digest/md5'
 
 require File.join(File.dirname(__FILE__), 'delsolr', 'response')
@@ -42,11 +40,12 @@ module DelSolr
     #
     # [<b><tt>:logger</tt></b>]
     #   (optional) Log4r logger object
-    def initialize(options = {})
+    def initialize(options = {}, &connection_block)
       @configuration = DelSolr::Client::Configuration.new(options[:server], options[:port], options[:timeout], options[:path])
       @cache = options[:cache]
       @logger = options[:logger]
       @shortcuts = options[:shortcuts]
+      setup_connection(&connection_block) if connection_block
     end
 
     #
@@ -168,7 +167,7 @@ module DelSolr
       if body.blank? # cache miss (or wasn't enabled)
         response = connection.post("#{configuration.path}/select", query_builder.request_string)
         body = response.body
-        
+
         # We get UTF-8 from Solr back, make sure the string knows about it
         # when running on Ruby >= 1.9
         if body.respond_to?(:force_encoding)
@@ -178,7 +177,7 @@ module DelSolr
       end
 
       response = DelSolr::Client::Response.new(body, query_builder, :logger => logger, :from_cache => from_cache, :shortcuts => @shortcuts)
-      
+
       url = "http://#{configuration.full_path}/select?#{query_builder.request_string}"
       if response && response.success?
         log_query_success(url, response, from_cache, (from_cache ? cache_time : response.qtime))
@@ -187,13 +186,13 @@ module DelSolr
         # log the full url to make debugging easier
         log_query_error(url)
       end
-      
+
       # Cache successful responses that don't come from the cache
       if response && response.success? && enable_caching && !from_cache
         # add to the cache if caching
         @cache.set(cache_key, body, ttl)
       end
-      
+
       response
     end
 
@@ -246,13 +245,14 @@ module DelSolr
       success?(rsp.body) or log_error(rsp.body)
     end
 
+    def setup_connection(&connection_block)
+      @connection_block = connection_block
+    end
+
     # accessor to the connection instance
     def connection
       @connection ||= begin
-        c = Net::HTTP.new(configuration.server, configuration.port)
-        c.read_timeout = configuration.timeout
-        raise "Failed to connect to #{configuration.server}:#{configuration.port}" if c.nil?
-        c
+        Faraday.new(:url => "http://#{configuration.server}:#{configuration.port}", :timeout => configuration.timeout, &connection_block)
       end
     end
 
@@ -267,7 +267,13 @@ module DelSolr
     end
 
     private
-    
+
+    def connection_block
+      @connection_block ||= lambda do |faraday|
+        faraday.adapter Faraday.default_adapter
+      end
+    end
+
     def log_query_success(url, response, from_cache, query_time)
       if logger
         l = []
@@ -277,11 +283,11 @@ module DelSolr
         logger.info l.join(' ')
       end
     end
-    
+
     def log_query_error(url)
       logger.error "ERROR #{url}" if logger
     end
-    
+
     # returns the update xml buffer
     def prepare_update_xml(options = {})
       r = ["<add#{options.to_xml_attribute_string}>\n"]
@@ -298,7 +304,7 @@ module DelSolr
     end
 
     def success?(response_body)
-      response_body.include?('<result status="0"></result>') || 
+      response_body.include?('<result status="0"></result>') ||
         response_body.include?('<lst name="responseHeader"><int name="status">0</int>')
     end
 

@@ -59,7 +59,7 @@ module DelSolr
         # remove params as we go so we can just pass whatever is left to solr...
 
         params << build_query(:q, opts.delete(:q))
-        params << {:wt => 'ruby'}
+        params << {:wt => 'json'}
         params << {:qt => query_name}
         params << {:rows => opts.delete(:rows)}
         params << {:start => opts.delete(:start)}

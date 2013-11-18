@@ -1,7 +1,4 @@
-require File.expand_path(File.dirname(__FILE__)) + '/test_helper'
-require 'rubygems'
-gem 'mocha', '>=0.9.0'
-require 'mocha'
+require 'test_helper'
 
 class ClientTest < Test::Unit::TestCase
 
@@ -52,8 +49,7 @@ class ClientTest < Test::Unit::TestCase
     </html> 
   }
 
-  RESPONSE_BUFFER = %{
-    {
+  RESPONSE_BUFFER = {
      'responseHeader'=>{
       'status'=>0,
       'QTime'=>151,
@@ -140,8 +136,8 @@ class ClientTest < Test::Unit::TestCase
       '9_widget'=>{},
       '10_widget'=>{},
       '11_widget'=>{},
-      '12_widget'=>{}}}
-  }
+      '12_widget'=>{}}
+  }.to_json
 
   def test_create
     s = nil
@@ -286,8 +282,11 @@ class ClientTest < Test::Unit::TestCase
     mock_query_builder.stubs(:request_string).returns('/select?some_query') # mock the query builder
     DelSolr::Client::QueryBuilder.stubs(:new).returns(mock_query_builder)
     c.connection.stubs(:post).returns(build_http_response(INVALID_BUFFER)) # mock the connection
-    c.query('standard', :query => '123')
-    assert_equal "ERROR http://localhost:8983/solr/select?/select?some_query", test_logger.errors.last
+    error_count = test_logger.errors.length
+    assert_raises JSON::ParserError do
+      c.query('standard', :query => '123')
+    end
+    assert_equal(error_count + 2, test_logger.errors.length)
   end
 
   def test_query_with_default_path

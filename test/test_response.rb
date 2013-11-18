@@ -1,11 +1,10 @@
-require File.expand_path(File.dirname(__FILE__)) + '/test_helper'
+require 'test_helper'
 
 class ResponseTest < Test::Unit::TestCase
 
   include Test::Unit::Assertions
 
-  @@test_001 = %{
-    {
+  @@test_001 = {
      'responseHeader'=>{
       'status'=>0,
       'QTime'=>151,
@@ -96,8 +95,8 @@ class ResponseTest < Test::Unit::TestCase
       'spellcheck'=>{
         'suggestions'=>[
           'fishh',{'numFound'=>1,'startOffset'=>0,'endOffset'=>4,'suggestion'=>['fish']},
-          'collation','fish']}}
-  }
+          'collation','fish']}
+  }.to_json
   
   def test_001
     r = nil

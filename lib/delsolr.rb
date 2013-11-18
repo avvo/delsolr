@@ -10,7 +10,7 @@ require 'faraday'
 require 'json'
 require 'digest/md5'
 
-require File.expand_path("../delsolr/extensions", __FILE__)
+require 'delsolr/extensions'
 
 module DelSolr
   autoload :Client, 'delsolr/client'

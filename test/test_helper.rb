@@ -1,2 +1,4 @@
 require 'test/unit'
-require File.expand_path(File.dirname(__FILE__)) + '/../lib/delsolr'
+
+Bundler.require(:default, :development)
+require 'json'

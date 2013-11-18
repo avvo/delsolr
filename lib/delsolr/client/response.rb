@@ -15,7 +15,7 @@ module DelSolr
         rescue JSON::ParserError => e
           if @logger
             @logger.error(solr_response_buffer)
-            @logger.error(e)
+            @logger.error(e.message)
           end
           raise e
         end

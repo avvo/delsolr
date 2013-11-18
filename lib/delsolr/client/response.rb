@@ -1,7 +1,7 @@
+require 'json'
+
 module DelSolr
-  
   class Client
-  
     class Response
 
       attr_reader :query_builder
@@ -11,11 +11,13 @@ module DelSolr
         @from_cache = options[:from_cache]
         @logger = options[:logger]
         begin
-          @raw_response = eval(solr_response_buffer)
-        rescue SyntaxError, Exception => e
-          @logger.error(solr_response_buffer) if @logger
-          @logger.error(e) if @logger
-          @raw_response = nil
+          @raw_response = JSON.parse(solr_response_buffer)
+        rescue JSON::ParserError => e
+          if @logger
+            @logger.error(solr_response_buffer)
+            @logger.error(e)
+          end
+          raise e
         end
 
         # now define the shortcuts

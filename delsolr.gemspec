@@ -8,11 +8,12 @@ Gem::Specification.new do |s|
   s.summary = %q{DelSolr is a light weight ruby wrapper for solr.  It's
       intention is to expose the full power of solr queries while keeping the
       interface as ruby-esque as possible.}
-      
+
   s.files = Dir["{app,config,db,lib}/**/*"] + ["License.txt", "Rakefile", "README.txt"]
   s.test_files = Dir.glob('test/*_test.rb')
 
-  s.add_dependency(%q{faraday}, ["~> 0.8.8"])
+  s.add_dependency("faraday", ["~> 0.8.8"])
+  s.add_dependency("json")
 
   s.add_development_dependency("mocha", [">= 0.9.0"])
   s.add_development_dependency("rake", ["0.9.2"])

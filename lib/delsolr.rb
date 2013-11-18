@@ -7,6 +7,7 @@
 #
 
 require 'faraday'
+require 'json'
 require 'digest/md5'
 
 require File.expand_path("../delsolr/extensions", __FILE__)

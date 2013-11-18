@@ -1,5 +1,3 @@
-require 'json'
-
 module DelSolr
   class Client
     class Response

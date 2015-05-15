@@ -7,6 +7,8 @@ module DelSolr
 
     attr_reader :configuration, :logger
 
+    class ConnectionError < StandardError; end
+
     #
     # [<b><tt>:server</tt></b>]
     #   the server you want to connect to
@@ -150,7 +152,16 @@ module DelSolr
       end
 
       if body.blank? # cache miss (or wasn't enabled)
-        response = connection.post("#{configuration.path}/select", query_builder.request_string)
+        response = begin
+          connection.post("#{configuration.path}/select", query_builder.request_string)
+        rescue Faraday::ClientError => e
+          raise ConnectionError, e.message
+        end
+
+        unless (200..299).include?(response.code.to_i)
+          raise ConnectionError, "Connection failed with status: #{response.code}"
+        end
+
         body = response.body
 
         # We get UTF-8 from Solr back, make sure the string knows about it

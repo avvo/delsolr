@@ -158,8 +158,9 @@ module DelSolr
           raise ConnectionError, e.message
         end
 
-        unless (200..299).include?(response.code.to_i)
-          raise ConnectionError, "Connection failed with status: #{response.code}"
+        code = response.respond_to?(:code) ? response.code : response.status
+        unless (200..299).include?(code.to_i)
+          raise ConnectionError, "Connection failed with status: #{code}"
         end
 
         body = response.body

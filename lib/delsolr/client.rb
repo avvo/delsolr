@@ -154,7 +154,7 @@ module DelSolr
       if body.blank? # cache miss (or wasn't enabled)
         response = begin
           connection.post("#{configuration.path}/select", query_builder.request_string)
-        rescue Faraday::ClientError => e
+        rescue Faraday::Error::ClientError => e
           raise ConnectionError, e.message
         end
 

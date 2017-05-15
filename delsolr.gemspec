@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "delsolr"
-  s.version = "0.3.2.a"
+  s.version = "0.3.2"
   s.authors = ["Ben VandenBos"]
   s.date = %q{2009-11-02}
   s.description = "Ruby wrapper for Lucene Solr"

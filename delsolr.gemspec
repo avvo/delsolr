@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "delsolr"
-  s.version = "0.3.1"
+  s.version = "0.3.2"
   s.authors = ["Ben VandenBos"]
   s.date = %q{2009-11-02}
   s.description = "Ruby wrapper for Lucene Solr"
@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + ["License.txt", "Rakefile", "README.rdoc"]
   s.test_files = Dir.glob('test/*_test.rb')
 
-  s.add_dependency("faraday", ["~> 0.8.8"])
+  s.add_dependency("faraday", ["~> 0.9.0"])
   s.add_dependency("json")
 
   s.add_development_dependency("mocha", [">= 0.9.0"])

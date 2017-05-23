@@ -249,7 +249,7 @@ module DelSolr
     # accessor to the connection instance
     def connection
       @connection ||= begin
-        Faraday.new(:url => "http://#{configuration.server}:#{configuration.port}", :timeout => configuration.timeout, &connection_block)
+        Faraday.new(:url => "http://#{configuration.server}:#{configuration.port}", &connection_block)
       end
     end
 
@@ -268,6 +268,7 @@ module DelSolr
     def connection_block
       @connection_block ||= lambda do |faraday|
         faraday.adapter Faraday.default_adapter
+        faraday.options[:timeout] = configuration.timeout
       end
     end
 

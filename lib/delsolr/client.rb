@@ -268,7 +268,6 @@ module DelSolr
     def connection_block
       @connection_block ||= lambda do |faraday|
         faraday.adapter Faraday.default_adapter
-        faraday.options[:timeout] = configuration.timeout
       end
     end
 

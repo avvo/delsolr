@@ -153,7 +153,9 @@ module DelSolr
 
       if body.blank? # cache miss (or wasn't enabled)
         response = begin
-          connection.post("#{configuration.path}/select", query_builder.request_string)
+          connection.post("#{configuration.path}/select", query_builder.request_string) do | req |
+            req.options.timeout = configuration.timeout
+          end
         rescue Faraday::ClientError => e
           raise ConnectionError, e.message
         end
@@ -268,7 +270,6 @@ module DelSolr
     def connection_block
       @connection_block ||= lambda do |faraday|
         faraday.adapter Faraday.default_adapter
-        faraday.options[:timeout] = configuration.timeout
       end
     end
 

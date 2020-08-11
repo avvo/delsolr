@@ -1,0 +1,42 @@
+---
+version: 2.1
+orbs:
+  aws-white-list-circleci-ip: configure/aws-white-list-circleci-ip@1.0.1
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.6
+    steps:
+      - checkout
+      - run: echo "export DATE=$(eval date +%s)" >> $BASH_ENV
+      - run: bundle config packagecloud.io $PACKAGECLOUD_READ_TOKEN
+      - run: gem install package_cloud
+      - aws-white-list-circleci-ip/add:
+         tag-key: Name
+         tag-value: artifactory_proxy_ingress_dyn
+         description: "circleci_gems_$DATE"
+      - run: |
+            cat \<< EOF > /home/circleci/.gem/credentials
+            ---
+            :rubygems_api_key: Basic $ARTIFACTORY_API_TOKEN
+            EOF
+      - run: chmod 0600 /home/circleci/.gem/credentials
+      - run: rm -f *.gem
+      - run: gem build $(ls *.gemspec)
+      - run: package_cloud push avvo/gems $(ls *.gem)
+      - run: gem push "$(ls *.gem)" --host https://avvo-gems.public.artifactory.internetbrands.com -v
+      - aws-white-list-circleci-ip/remove:
+          tag-key: Name
+          tag-value: artifactory_proxy_ingress_dyn
+          description: "circleci_gems_$DATE"
+workflows:
+  version: 2.1
+  build-workflow:
+    jobs:
+    - build:
+        context: org-global
+        filters:
+          tags:
+            only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+          branches:
+            ignore: /.*/

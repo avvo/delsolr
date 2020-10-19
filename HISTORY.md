@@ -1,5 +1,11 @@
 Version Changes
 ===============
+
+0.3.4pre3
+---------
+* Update to publish Avvo gem to both Packagecloud and Artifactory
+* Refactor CircleCi configuration to test with multiple Ruby versions.
+
 0.1.6
 -----
 * Added a way to return spelling correction per word

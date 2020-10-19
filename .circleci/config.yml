@@ -13,8 +13,8 @@ jobs:
 
     steps:
       - checkout
-      - artifact-management/gem-test
-
+      - artifact-management/gem-test:
+            ruby_versions: "2.2.10,2.3.8,2.4.10,2.5.8,2.6.6" 
   build:
     docker:
       - image: circleci/ruby:2.6

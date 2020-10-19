@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  artifact-management: avvo/artifact-management@0.0.6
+
+jobs:
+  test:
+    docker:
+      - image: avvo/ruby-testing
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASS
+
+    steps:
+      - checkout
+      - artifact-management/gem-test
+
+  build:
+    docker:
+      - image: circleci/ruby:2.6
+    steps:
+      - checkout
+      - artifact-management/gem-build-and-push
+
+workflows:
+  version: 2.1
+  build-workflow:
+    jobs:
+      - test:
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+      - build:
+          requires:
+          - test
+          context: org-global
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
+

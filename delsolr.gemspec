@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "delsolr"
-  s.version = "0.3.3"
+  s.version = "0.3.4pre4"
   s.authors = ["Ben VandenBos"]
   s.date = %q{2009-11-02}
   s.description = "Ruby wrapper for Lucene Solr"
@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.add_dependency("faraday", ["~> 0.9.0"])
   s.add_dependency("json")
 
+  s.add_development_dependency("test-unit")
   s.add_development_dependency("mocha", [">= 0.9.0"])
   s.add_development_dependency("rake", ["0.9.2"])
 end

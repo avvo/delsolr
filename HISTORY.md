@@ -1,5 +1,9 @@
 Version Changes
 ===============
+0.3.4
+-----
+* Update to publish to Artifactory using avvo/artifact-management orb
+
 0.1.6
 -----
 * Added a way to return spelling correction per word

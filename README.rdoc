@@ -7,6 +7,14 @@ http://delsolr.rubyforge.org
 DelSolr is a light weight ruby wrapper for solr.  It's intention is to expose the full power of solr queries 
 while keeping the interface as ruby-esque as possible.
 
+== Tested Ruby Versions
+Version       Result
+2.6.6         Pass
+2.5.8         Pass
+2.4.10        Pass
+2.3.8         Pass
+2.2.10        Pass
+
 == Installation
 
 Can be installed as a gem which is hosted on http://gemcutter.org
